@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>InternAI — Internship Preferences</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --gold: #c9a96e;
+    --gold-light: #e8d5b0;
+    --gold-dark: #9a7a45;
+    --obsidian: #0a0a0f;
+    --deep: #10101a;
+    --surface: #14141f;
+    --surface2: #1c1c2e;
+    --text: #f0ece3;
+    --text-muted: #8a8278;
+    --border: rgba(201,169,110,0.2);
+    --border-subtle: rgba(201,169,110,0.08);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--obsidian);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow: hidden;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+/* ── AMBIENT ── */
+.bg-ambient { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+.bg-orb { position: absolute; border-radius: 50%; filter: blur(90px); animation: drift 14s ease-in-out infinite alternate; }
+.bg-orb-1 { width: 550px; height: 550px; background: radial-gradient(circle, rgba(201,169,110,0.11), transparent); top: -20%; right: -10%; animation-delay: 0s; }
+.bg-orb-2 { width: 380px; height: 380px; background: radial-gradient(circle, rgba(180,60,120,0.08), transparent); bottom: -10%; left: -8%; animation-delay: -5s; }
+
+@keyframes drift {
+    from { transform: translate(0,0) scale(1); }
+    to   { transform: translate(20px,-15px) scale(1.04); }
+}
+
+.bg-grain {
+    position: fixed; inset: 0; pointer-events: none; z-index: 1; opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ── PROGRESS BAR ── */
+.progress-track {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: var(--border-subtle);
+    z-index: 1000;
+}
+
+.progress-fill {
+    height: 100%;
+    width: 66%;
+    background: linear-gradient(90deg, var(--gold-dark), var(--gold), var(--gold-light));
+    position: relative;
+}
+
+.progress-fill::after {
+    content: '';
+    position: absolute;
+    right: 0; top: -2px;
+    width: 5px; height: 5px;
+    background: var(--gold);
+    border-radius: 50%;
+}
+
+.progress-label {
+    position: fixed;
+    top: 12px; right: 24px;
+    z-index: 1000;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+.progress-label span { color: var(--gold); }
+
+/* ── CARD ── */
+.card {
+    position: relative;
+    z-index: 2;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    width: 100%;
+    max-width: 480px;
+    padding: 52px 48px;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.55), 0 0 0 1px rgba(201,169,110,0.06);
+    opacity: 0;
+    transform: translateY(28px);
+    animation: revealCard 0.85s cubic-bezier(0.16,1,0.3,1) 0.05s forwards;
+}
+
+/* top shimmer line */
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+/* corner accents */
+.card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; right: 0;
+    width: 30px; height: 30px;
+    border-bottom: 1px solid var(--gold);
+    border-right: 1px solid var(--gold);
+}
+
+@keyframes revealCard {
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── BRAND ── */
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 36px;
+}
+
+.brand-mark {
+    width: 34px; height: 34px;
+    border: 1px solid var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    position: relative; flex-shrink: 0;
+}
+.brand-mark::before { content: ''; position: absolute; top:-3px; left:-3px; width:4px; height:4px; background:var(--gold); }
+.brand-mark::after  { content: ''; position: absolute; bottom:-3px; right:-3px; width:4px; height:4px; background:var(--gold); }
+.brand-mark svg { width: 16px; height: 16px; fill: none; stroke: var(--gold); stroke-width: 1.5; }
+
+.brand-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px; font-weight: 300;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--text);
+}
+.brand-name span { color: var(--gold); }
+
+/* ── HEADING ── */
+.card-eyebrow {
+    font-size: 9px; font-weight: 500; letter-spacing: 0.32em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+}
+.card-eyebrow::before {
+    content: ''; display: inline-block; width: 20px; height: 1px; background: var(--gold);
+}
+
+.card-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 34px; font-weight: 300; line-height: 1.1;
+    color: var(--text); letter-spacing: 0.02em; margin-bottom: 6px;
+}
+.card-title em { font-style: italic; color: var(--gold); }
+
+.card-sub {
+    font-size: 11px; font-weight: 300; color: var(--text-muted);
+    letter-spacing: 0.06em; line-height: 1.7; margin-bottom: 36px;
+}
+
+/* ── STEP DIVIDER ── */
+.step-div {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 28px;
+}
+.step-div-line { flex: 1; height: 1px; background: var(--border-subtle); }
+.step-div-label {
+    font-size: 8px; font-weight: 500; letter-spacing: 0.25em;
+    text-transform: uppercase; color: var(--text-muted); white-space: nowrap;
+}
+.step-dot { width: 3px; height: 3px; background: var(--gold); border-radius: 50%; }
+
+/* ── FORM GROUPS ── */
+.form-group { margin-bottom: 24px; }
+
+.field-label {
+    display: block;
+    font-size: 9px; font-weight: 500; letter-spacing: 0.25em;
+    text-transform: uppercase; color: var(--text-muted);
+    margin-bottom: 10px; transition: color 0.3s;
+}
+
+.select-wrap { position: relative; }
+
+select {
+    width: 100%;
+    padding: 14px 44px 14px 18px;
+    background: var(--surface2);
+    border: 1px solid rgba(201,169,110,0.15);
+    border-radius: 2px;
+    font-size: 13px; font-family: 'Montserrat', sans-serif;
+    font-weight: 400; color: var(--text);
+    letter-spacing: 0.04em;
+    transition: all 0.3s ease;
+    appearance: none;
+    cursor: pointer;
+    /* custom chevron */
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23c9a96e' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 16px;
+}
+
+select:focus {
+    outline: none;
+    border-color: var(--gold);
+    background-color: rgba(201,169,110,0.04);
+    box-shadow: 0 0 0 1px rgba(201,169,110,0.1), 0 4px 20px rgba(0,0,0,0.25);
+}
+
+select option {
+    background: var(--surface2);
+    color: var(--text);
+}
+
+/* option highlight icons via pseudo - not possible in native select, so we use labels */
+.select-wrap::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: transparent;
+    border-radius: 0;
+    transition: background 0.3s;
+}
+.select-wrap:focus-within::before { background: var(--gold); }
+
+/* ── BUTTONS ── */
+.buttons {
+    display: flex; gap: 10px; margin-top: 32px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border-subtle);
+}
+
+.btn {
+    flex: 1; padding: 14px 18px;
+    background: transparent; border-radius: 2px;
+    font-size: 9px; font-family: 'Montserrat', sans-serif;
+    font-weight: 600; letter-spacing: 0.28em; text-transform: uppercase;
+    cursor: pointer; position: relative; overflow: hidden;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: color 0.4s;
+}
+.btn span, .btn i { position: relative; z-index: 1; }
+.btn::before {
+    content: ''; position: absolute; inset: 0;
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+
+.back-btn {
+    color: var(--text-muted);
+    border: 1px solid var(--border-subtle);
+    flex: 0 0 auto; padding: 14px 20px;
+}
+.back-btn::before { background: var(--surface2); }
+.back-btn:hover { color: var(--text); border-color: var(--border); }
+.back-btn:hover::before { transform: scaleX(1); }
+
+.finish-btn {
+    color: var(--gold);
+    border: 1px solid var(--gold);
+}
+.finish-btn::before { background: var(--gold); }
+.finish-btn:hover { color: var(--obsidian); }
+.finish-btn:hover::before { transform: scaleX(1); }
+.finish-btn:disabled { opacity: 0.5; pointer-events: none; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 520px) {
+    .card { padding: 36px 28px; }
+    .card-title { font-size: 28px; }
+    .buttons { flex-direction: column-reverse; }
+    .back-btn { flex: 1; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="bg-ambient">
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+</div>
+<div class="bg-grain"></div>
+
+<!-- Progress -->
+<div class="progress-track">
+    <div class="progress-fill"></div>
+</div>
+<div class="progress-label">Step <span>2</span> of 3</div>
+
+<!-- Card -->
+<div class="card">
+
+    <!-- Brand -->
+    <div class="brand">
+        <div class="brand-mark">
+            <svg viewBox="0 0 24 24">
+                <path d="M12 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>
+                <path d="M12 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>
+                <path d="M4 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>
+                <path d="M20 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>
+                <path d="M12 6v4M12 14v4M6 12h4M14 12h4"/>
+            </svg>
+        </div>
+        <div class="brand-name">Intern<span>AI</span></div>
+    </div>
+
+    <!-- Heading -->
+    <div class="card-eyebrow">Your Preferences</div>
+    <h2 class="card-title">Internship<br><em>parameters</em></h2>
+    <p class="card-sub">Help us match you with opportunities that align with your expectations and working style.</p>
+
+    <div class="step-div">
+        <div class="step-div-line"></div>
+        <div class="step-dot"></div>
+        <div class="step-div-label">Preference Details</div>
+        <div class="step-dot"></div>
+        <div class="step-div-line"></div>
+    </div>
+
+    <!-- Form -->
+    <div class="form-group">
+        <label class="field-label" for="internshipType">Preferred Work Mode</label>
+        <div class="select-wrap">
+            <select id="internshipType">
+                <option value="Remote">Remote — Work from anywhere</option>
+                <option value="Onsite">Onsite — In-person at office</option>
+                <option value="Hybrid">Hybrid — Flexible blend</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="field-label" for="expectedStipend">Expected Monthly Stipend</label>
+        <div class="select-wrap">
+            <select id="expectedStipend">
+                <option value="Unpaid">Unpaid / Voluntary</option>
+                <option value="5000-10000">₹5,000 – ₹10,000</option>
+                <option value="10000-20000">₹10,000 – ₹20,000</option>
+                <option value="20000+">₹20,000 and above</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="buttons">
+        <button class="btn back-btn" onclick="goBack()">
+            <span>← Back</span>
+        </button>
+        <button class="btn finish-btn" id="finishBtn" onclick="submitSurvey()">
+            <span>Finish & Submit</span>
+        </button>
+    </div>
+
+</div>
+
+<script>
+function goBack() {
+    document.body.style.opacity = '0';
+    document.body.style.transform = 'scale(0.97)';
+    setTimeout(() => window.location.href = "survey1.html", 320);
+}
+
+function submitSurvey() {
+    const email = localStorage.getItem("userEmail");
+    const domains = localStorage.getItem("domains");
+    const internshipType = document.getElementById("internshipType").value;
+    const expectedStipend = document.getElementById("expectedStipend").value;
+
+    const finishBtn = document.getElementById('finishBtn');
+    finishBtn.querySelector('span').textContent = 'Submitting…';
+    finishBtn.disabled = true;
+
+    fetch(`http://localhost:8080/api/students/submitSurvey?email=${email}&domains=${domains}&internshipType=${internshipType}&expectedStipend=${expectedStipend}`, {
+        method: "POST"
+    })
+    .then(res => res.text())
+    .then(data => {
+        localStorage.setItem("internshipType", internshipType);
+        localStorage.setItem("expectedStipend", expectedStipend);
+        document.body.style.opacity = '0';
+        document.body.style.transform = 'scale(0.97)';
+        setTimeout(() => window.location.href = "thankyou.html", 400);
+    })
+    .catch(err => {
+        alert("Submission failed. Please try again.");
+        finishBtn.querySelector('span').textContent = 'Finish & Submit';
+        finishBtn.disabled = false;
+    });
+}
+</script>
+
+</body>
+</html>

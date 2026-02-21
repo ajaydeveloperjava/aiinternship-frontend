@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InternAI — Create Account</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700;1,800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+        :root {
+            --black: #040507;
+            --white: #f5f3ef;
+            --gold: #c9a84c;
+            --gold2: #e8c97a;
+            --gold-dim: rgba(201,168,76,0.15);
+            --blue: #2a7fff;
+            --text: #f5f3ef;
+            --muted: rgba(245,243,239,0.42);
+            --border: rgba(245,243,239,0.08);
+            --surface: rgba(245,243,239,0.04);
+            --input-bg: rgba(245,243,239,0.05);
+            --input-border: rgba(245,243,239,0.1);
+            --input-focus: rgba(201,168,76,0.35);
+        }
+
+        html, body { height:100%; }
+
+        body {
+            font-family:'Outfit',sans-serif;
+            background:var(--black);
+            color:var(--text);
+            min-height:100vh;
+            display:flex;
+            flex-direction:column;
+            cursor:none;
+            overflow-x:hidden;
+        }
+
+        /* CURSOR */
+        .cursor-dot {
+            width:7px; height:7px;
+            background:var(--white); border-radius:50%;
+            position:fixed; pointer-events:none; z-index:9999;
+            transform:translate(-50%,-50%);
+            mix-blend-mode:difference;
+        }
+        .cursor-ring {
+            width:32px; height:32px;
+            border:1.5px solid rgba(245,243,239,0.35);
+            border-radius:50%;
+            position:fixed; pointer-events:none; z-index:9998;
+            transform:translate(-50%,-50%);
+            transition:width 0.3s,height 0.3s,border-color 0.3s;
+            mix-blend-mode:difference;
+        }
+
+        /* CANVAS */
+        #particles { position:fixed; inset:0; z-index:0; pointer-events:none; }
+
+        /* BG WORD */
+        .bg-word {
+            position:fixed; bottom:-50px; right:-40px;
+            font-family:'Playfair Display',serif;
+            font-size:280px; font-weight:900;
+            color:transparent;
+            -webkit-text-stroke:1px rgba(245,243,239,0.018);
+            white-space:nowrap; pointer-events:none; z-index:0;
+            letter-spacing:-12px; user-select:none;
+            transform:rotate(-8deg);
+        }
+
+        /* GRID */
+        body::after {
+            content:'';
+            position:fixed; inset:0;
+            background-image:
+                linear-gradient(rgba(201,168,76,0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(201,168,76,0.025) 1px, transparent 1px);
+            background-size:64px 64px;
+            pointer-events:none; z-index:0;
+        }
+
+        /* ─── HEADER ─── */
+        .header {
+            position:relative; z-index:10;
+            padding:24px 52px;
+            display:flex; align-items:center; justify-content:space-between;
+            border-bottom:1px solid var(--border);
+            background:rgba(4,5,7,0.6);
+            backdrop-filter:blur(20px);
+            animation:fadeDown 0.8s cubic-bezier(0.16,1,0.3,1) both;
+        }
+
+        .header::after {
+            content:'';
+            position:absolute; bottom:0; left:0; right:0; height:1px;
+            background:linear-gradient(90deg,transparent 5%,rgba(201,168,76,0.28) 40%,rgba(201,168,76,0.28) 60%,transparent 95%);
+        }
+
+        @keyframes fadeDown { from{opacity:0;transform:translateY(-16px);} to{opacity:1;transform:translateY(0);} }
+
+        .brand { display:flex; align-items:center; gap:12px; text-decoration:none; }
+
+        .brand-gem {
+            width:40px; height:40px;
+            background:linear-gradient(135deg,var(--gold),var(--gold2) 60%,#fff8e1);
+            border-radius:11px;
+            display:flex; align-items:center; justify-content:center;
+            font-size:17px; color:var(--black);
+            box-shadow:0 0 28px rgba(201,168,76,0.4), 0 0 56px rgba(201,168,76,0.1);
+            animation:gemGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes gemGlow {
+            0%,100%{box-shadow:0 0 28px rgba(201,168,76,0.38), 0 0 52px rgba(201,168,76,0.1);}
+            50%{box-shadow:0 0 42px rgba(201,168,76,0.56), 0 0 76px rgba(201,168,76,0.18);}
+        }
+
+        .brand-name {
+            font-family:'Playfair Display',serif;
+            font-size:21px; font-weight:800; color:var(--white);
+        }
+
+        .brand-name em {
+            font-style:italic;
+            background:linear-gradient(135deg,var(--gold),var(--gold2));
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+        }
+
+        .header-step {
+            display:flex; align-items:center; gap:8px;
+            font-size:11px; font-weight:700;
+            text-transform:uppercase; letter-spacing:1.5px;
+            color:var(--muted);
+        }
+
+        .header-step i { color:var(--gold); font-size:10px; }
+
+        /* ─── MAIN ─── */
+        .main {
+            flex:1; position:relative; z-index:1;
+            display:flex; align-items:center; justify-content:center;
+            padding:48px 24px 60px;
+        }
+
+        .stage {
+            width:100%; max-width:1060px;
+            display:grid; grid-template-columns:1fr 1fr;
+            gap:0; align-items:stretch;
+            min-height:560px;
+        }
+
+        /* ─── LEFT ─── */
+        .left {
+            padding:64px 56px 64px 0;
+            display:flex; flex-direction:column; justify-content:center;
+            border-right:1px solid var(--border);
+            animation:slideLeft 1s cubic-bezier(0.16,1,0.3,1) 0.1s both;
+        }
+
+        @keyframes slideLeft { from{opacity:0;transform:translateX(-32px);} to{opacity:1;transform:translateX(0);} }
+
+        .eyebrow {
+            display:flex; align-items:center; gap:12px; margin-bottom:26px;
+        }
+
+        .eyebrow-bar { width:40px; height:1px; background:linear-gradient(90deg,var(--gold),rgba(201,168,76,0.2)); }
+
+        .eyebrow-lbl {
+            font-size:10.5px; font-weight:700;
+            text-transform:uppercase; letter-spacing:2.5px; color:var(--gold);
+        }
+
+        .left-headline {
+            font-family:'Playfair Display',serif;
+            font-size:58px; line-height:0.98; font-weight:900;
+            letter-spacing:-2px; margin-bottom:28px;
+        }
+
+        .lh-a { color:var(--white); display:block; }
+        .lh-b {
+            display:block; font-style:italic;
+            background:linear-gradient(120deg,var(--gold) 0%,var(--gold2) 55%,rgba(255,248,220,0.9) 100%);
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+        }
+        .lh-c {
+            display:block; color:transparent;
+            -webkit-text-stroke:1.5px rgba(245,243,239,0.18);
+        }
+
+        .left-sub {
+            font-size:14.5px; color:var(--muted); line-height:1.8;
+            max-width:320px; margin-bottom:40px;
+        }
+
+        .left-sub b { color:rgba(245,243,239,0.75); font-weight:500; }
+
+        /* FEATURE LIST */
+        .features { display:flex; flex-direction:column; gap:14px; }
+
+        .feat {
+            display:flex; align-items:center; gap:14px;
+        }
+
+        .feat-icon {
+            width:34px; height:34px; border-radius:10px; flex-shrink:0;
+            display:flex; align-items:center; justify-content:center;
+            font-size:13px;
+            background:rgba(201,168,76,0.1);
+            border:1px solid rgba(201,168,76,0.2);
+            color:var(--gold);
+        }
+
+        .feat-text { font-size:13.5px; color:rgba(245,243,239,0.65); font-weight:400; }
+
+        /* ─── RIGHT (FORM) ─── */
+        .right {
+            padding:64px 0 64px 60px;
+            display:flex; flex-direction:column; justify-content:center;
+            animation:slideRight 1s cubic-bezier(0.16,1,0.3,1) 0.2s both;
+        }
+
+        @keyframes slideRight { from{opacity:0;transform:translateX(32px);} to{opacity:1;transform:translateX(0);} }
+
+        .form-eyebrow {
+            font-size:10px; font-weight:700;
+            text-transform:uppercase; letter-spacing:2px;
+            color:var(--muted); margin-bottom:14px;
+        }
+
+        .form-title {
+            font-family:'Playfair Display',serif;
+            font-size:36px; font-weight:800; letter-spacing:-1px;
+            color:var(--white); margin-bottom:8px;
+        }
+
+        .form-title em {
+            font-style:italic;
+            background:linear-gradient(135deg,var(--gold),var(--gold2));
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+        }
+
+        .form-sub { font-size:13.5px; color:var(--muted); margin-bottom:36px; }
+
+        /* FORM GROUPS */
+        .form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+
+        .form-group {
+            position:relative; margin-bottom:14px;
+        }
+
+        .form-group.full { grid-column:span 2; }
+
+        .fg-label {
+            display:block;
+            font-size:10.5px; font-weight:700;
+            text-transform:uppercase; letter-spacing:1.2px;
+            color:var(--muted); margin-bottom:8px;
+        }
+
+        .fg-wrap {
+            position:relative;
+        }
+
+        .fg-icon {
+            position:absolute; left:16px; top:50%; transform:translateY(-50%);
+            font-size:13px; color:var(--muted);
+            transition:color 0.3s; pointer-events:none;
+            z-index:1;
+        }
+
+        .form-group input {
+            width:100%;
+            padding:13px 16px 13px 42px;
+            background:var(--input-bg);
+            border:1px solid var(--input-border);
+            border-radius:12px;
+            font-family:'Outfit',sans-serif;
+            font-size:14px; font-weight:400;
+            color:var(--text);
+            transition:all 0.3s cubic-bezier(0.16,1,0.3,1);
+            outline:none;
+        }
+
+        .form-group input::placeholder { color:rgba(245,243,239,0.25); font-size:13px; }
+
+        .form-group input:focus {
+            background:rgba(201,168,76,0.06);
+            border-color:rgba(201,168,76,0.45);
+            box-shadow:0 0 0 3px rgba(201,168,76,0.1), 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .form-group input:focus + .fg-icon,
+        .fg-wrap:focus-within .fg-icon {
+            color:var(--gold);
+        }
+
+        /* Reorder icon inside wrap */
+        .fg-wrap input { order:1; }
+        .fg-wrap .fg-icon { order:0; }
+
+        /* SUBMIT */
+        #submitBtn {
+            width:100%; padding:15px;
+            background:linear-gradient(135deg,var(--gold),var(--gold2) 60%,#f0d080);
+            color:var(--black);
+            border:none; border-radius:13px;
+            font-family:'Outfit',sans-serif;
+            font-size:14.5px; font-weight:700;
+            cursor:none; letter-spacing:0.3px;
+            transition:all 0.35s cubic-bezier(0.16,1,0.3,1);
+            box-shadow:0 8px 28px rgba(201,168,76,0.3);
+            position:relative; overflow:hidden;
+            margin-top:6px;
+        }
+
+        #submitBtn::before {
+            content:'';
+            position:absolute; top:0; left:-100%; width:100%; height:100%;
+            background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent);
+            transition:left 0.5s;
+        }
+
+        #submitBtn:hover::before { left:100%; }
+
+        #submitBtn:hover {
+            transform:translateY(-2px);
+            box-shadow:0 16px 44px rgba(201,168,76,0.45);
+        }
+
+        #submitBtn:disabled {
+            background:var(--surface);
+            color:var(--muted);
+            box-shadow:none; cursor:not-allowed; transform:none;
+        }
+
+        /* SPINNER INSIDE BTN */
+        .btn-spinner {
+            display:none; width:16px; height:16px;
+            border:2px solid rgba(4,5,7,0.2);
+            border-top-color:var(--black);
+            border-radius:50%;
+            animation:spin 0.7s linear infinite;
+            margin-right:8px; vertical-align:middle;
+        }
+
+        .btn-spinner.show { display:inline-block; }
+
+        @keyframes spin { to{transform:rotate(360deg);} }
+
+        /* MESSAGE */
+        #message {
+            display:none;
+            padding:12px 18px;
+            border-radius:10px;
+            font-size:13px; font-weight:500;
+            margin-top:14px;
+            animation:fadeIn 0.35s ease both;
+        }
+
+        @keyframes fadeIn { from{opacity:0;transform:translateY(-6px);} to{opacity:1;transform:translateY(0);} }
+
+        .error {
+            background:rgba(248,113,113,0.1);
+            border:1px solid rgba(248,113,113,0.25);
+            color:#f87171;
+        }
+
+        .success {
+            background:rgba(34,197,94,0.1);
+            border:1px solid rgba(34,197,94,0.25);
+            color:#4ade80;
+        }
+
+        /* LOGIN LINK */
+        .login-link {
+            text-align:center;
+            padding-top:18px;
+            margin-top:18px;
+            border-top:1px solid var(--border);
+            font-size:13px; color:var(--muted);
+        }
+
+        .login-link a {
+            color:var(--gold);
+            text-decoration:none; font-weight:600;
+            transition:color 0.2s;
+        }
+
+        .login-link a:hover { color:var(--gold2); }
+
+        /* ─── FOOTER ─── */
+        .footer {
+            position:relative; z-index:1;
+            padding:16px 52px;
+            display:flex; align-items:center; justify-content:space-between;
+            border-top:1px solid var(--border);
+            background:rgba(4,5,7,0.4);
+            backdrop-filter:blur(16px);
+        }
+
+        .footer-copy { font-size:11.5px; color:var(--muted); }
+
+        .footer-links { display:flex; gap:20px; }
+
+        .footer-links a {
+            font-size:11.5px; color:var(--muted);
+            text-decoration:none; transition:color 0.2s;
+        }
+
+        .footer-links a:hover { color:var(--gold); }
+
+        /* RESPONSIVE */
+        @media(max-width:860px){
+            .stage { grid-template-columns:1fr; }
+            .left { padding:40px 0 32px; border-right:none; border-bottom:1px solid var(--border); }
+            .right { padding:32px 0 0; }
+            .left-headline { font-size:38px; }
+            .form-row { grid-template-columns:1fr; }
+            .form-group.full { grid-column:span 1; }
+            .header { padding:18px 24px; }
+            .footer { padding:14px 24px; flex-direction:column; gap:10px; text-align:center; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<canvas id="particles"></canvas>
+<div class="bg-word">Join</div>
+
+<!-- HEADER -->
+<header class="header">
+    <a class="brand" href="index.html">
+        <div class="brand-gem"><i class="fas fa-brain"></i></div>
+        <div class="brand-name">Intern<em>AI</em></div>
+    </a>
+    <div class="header-step">
+        <i class="fas fa-user-plus"></i>
+        Student Registration
+    </div>
+</header>
+
+<!-- MAIN -->
+<main class="main">
+    <div class="stage">
+
+        <!-- LEFT -->
+        <div class="left">
+            <div class="eyebrow">
+                <div class="eyebrow-bar"></div>
+                <div class="eyebrow-lbl">Why Join Us</div>
+            </div>
+            <h1 class="left-headline">
+                <span class="lh-a">Begin Your</span>
+                <span class="lh-b">Career</span>
+                <span class="lh-c">Journey</span>
+            </h1>
+            <p class="left-sub">
+                Join thousands of students using <b>AI-powered matching</b> to land the right internship — faster than ever before.
+            </p>
+            <div class="features">
+                <div class="feat">
+                    <div class="feat-icon"><i class="fas fa-brain"></i></div>
+                    <div class="feat-text">AI skill analysis & smart matching</div>
+                </div>
+                <div class="feat">
+                    <div class="feat-icon"><i class="fas fa-chart-line"></i></div>
+                    <div class="feat-text">Real-time selection probability score</div>
+                </div>
+                <div class="feat">
+                    <div class="feat-icon"><i class="fas fa-graduation-cap"></i></div>
+                    <div class="feat-text">Personalized career roadmap</div>
+                </div>
+                <div class="feat">
+                    <div class="feat-icon"><i class="fas fa-rocket"></i></div>
+                    <div class="feat-text">2.4x faster internship placement</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="right">
+            <div class="form-eyebrow">New Account</div>
+            <h2 class="form-title">Create <em>Account</em></h2>
+            <p class="form-sub">Start your AI career journey today</p>
+
+            <form id="signupForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="fg-label" for="fullName">Full Name</label>
+                        <div class="fg-wrap">
+                            <input type="text" id="fullName" placeholder="John Doe" required>
+                            <i class="fas fa-user fg-icon"></i>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="fg-label" for="email">Email Address</label>
+                        <div class="fg-wrap">
+                            <input type="email" id="email" placeholder="you@example.com" required>
+                            <i class="fas fa-envelope fg-icon"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="fg-label" for="password">Password</label>
+                        <div class="fg-wrap">
+                            <input type="password" id="password" placeholder="Min. 6 characters" required>
+                            <i class="fas fa-lock fg-icon"></i>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="fg-label" for="confirmPassword">Confirm Password</label>
+                        <div class="fg-wrap">
+                            <input type="password" id="confirmPassword" placeholder="Repeat password" required>
+                            <i class="fas fa-shield-alt fg-icon"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" id="submitBtn">
+                    <span class="btn-spinner" id="spinner"></span>
+                    <span id="btnText">Create Account</span>
+                </button>
+            </form>
+
+            <div id="message" class="message"></div>
+
+            <div class="login-link">
+                Already have an account? <a href="student-login.html">Sign in here</a>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <div class="footer-copy">© 2026 InternAI. All rights reserved.</div>
+    <div class="footer-links">
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#">Support</a>
+    </div>
+</footer>
+
+<script>
+/* ─── CURSOR ─── */
+const dot  = document.getElementById('cursorDot');
+const ring = document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+
+document.addEventListener('mousemove',e=>{
+    mx=e.clientX; my=e.clientY;
+    dot.style.left=mx+'px'; dot.style.top=my+'px';
+});
+
+(function loopRing(){
+    rx+=(mx-rx)*0.11; ry+=(my-ry)*0.11;
+    ring.style.left=rx+'px'; ring.style.top=ry+'px';
+    requestAnimationFrame(loopRing);
+})();
+
+document.querySelectorAll('input, button, a').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{ ring.style.width='48px'; ring.style.height='48px'; ring.style.borderColor='rgba(201,168,76,0.6)'; });
+    el.addEventListener('mouseleave',()=>{ ring.style.width='32px'; ring.style.height='32px'; ring.style.borderColor='rgba(245,243,239,0.35)'; });
+});
+
+/* ─── PARTICLES ─── */
+const cvs=document.getElementById('particles');
+const ctx=cvs.getContext('2d');
+let W,H,pts=[];
+
+function resize(){ W=cvs.width=window.innerWidth; H=cvs.height=window.innerHeight; }
+resize(); window.addEventListener('resize',resize);
+
+function Pt(){
+    this.x=Math.random()*W; this.y=Math.random()*H;
+    this.s=Math.random()*1.0+0.3;
+    this.vx=(Math.random()-.5)*0.16; this.vy=(Math.random()-.5)*0.16;
+    this.a=Math.random()*0.35+0.07;
+    this.col=Math.random()>.55?`rgba(201,168,76,${this.a})`:`rgba(245,243,239,${this.a})`;
+}
+Pt.prototype.tick=function(){ this.x+=this.vx; this.y+=this.vy; if(this.x<0)this.x=W; if(this.x>W)this.x=0; if(this.y<0)this.y=H; if(this.y>H)this.y=0; };
+
+for(let i=0;i<80;i++) pts.push(new Pt());
+
+function draw(){
+    ctx.clearRect(0,0,W,H);
+    for(let i=0;i<pts.length;i++){
+        for(let j=i+1;j<pts.length;j++){
+            const dx=pts[i].x-pts[j].x, dy=pts[i].y-pts[j].y;
+            const d=Math.sqrt(dx*dx+dy*dy);
+            if(d<100){
+                ctx.beginPath();
+                ctx.strokeStyle=`rgba(201,168,76,${0.05*(1-d/100)})`;
+                ctx.lineWidth=0.5;
+                ctx.moveTo(pts[i].x,pts[i].y); ctx.lineTo(pts[j].x,pts[j].y);
+                ctx.stroke();
+            }
+        }
+    }
+    pts.forEach(p=>{ p.tick(); ctx.beginPath(); ctx.arc(p.x,p.y,p.s,0,Math.PI*2); ctx.fillStyle=p.col; ctx.fill(); });
+    requestAnimationFrame(draw);
+}
+draw();
+
+/* ─── FORM ─── */
+document.getElementById("signupForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const fullName = document.getElementById("fullName").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+    const confirmPassword = document.getElementById("confirmPassword").value;
+    const message = document.getElementById("message");
+    const submitBtn = document.getElementById("submitBtn");
+    const btnText = document.getElementById("btnText");
+    const spinner = document.getElementById("spinner");
+
+    message.style.display = "none";
+    message.className = "message";
+
+    if (!fullName) { showMessage("Please enter your full name", "error"); return; }
+    if (!email || !/\S+@\S+\.\S+/.test(email)) { showMessage("Please enter a valid email address", "error"); return; }
+    if (password.length < 6) { showMessage("Password must be at least 6 characters", "error"); return; }
+    if (password !== confirmPassword) { showMessage("Passwords do not match", "error"); return; }
+
+    submitBtn.disabled = true;
+    spinner.classList.add("show");
+    btnText.textContent = "Creating Account...";
+
+    fetch("http://localhost:8080/api/students/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fullName, email, password })
+    })
+    .then(res => res.text())
+    .then(data => {
+        submitBtn.disabled = false;
+        spinner.classList.remove("show");
+        btnText.textContent = "Create Account";
+
+        if (data === "Signup successful") {
+            showMessage("Account created successfully! Redirecting...", "success");
+            setTimeout(() => { window.location.href = "student-login.html"; }, 2000);
+        } else {
+            showMessage(data || "Signup failed. Please try again.", "error");
+        }
+    })
+    .catch(error => {
+        submitBtn.disabled = false;
+        spinner.classList.remove("show");
+        btnText.textContent = "Create Account";
+        showMessage("Network error. Please check your connection.", "error");
+        console.error("Signup error:", error);
+    });
+});
+
+function showMessage(text, type) {
+    const message = document.getElementById("message");
+    message.textContent = text;
+    message.className = `message ${type}`;
+    message.style.display = "block";
+    if (type === "success") setTimeout(() => { message.style.display = "none"; }, 5000);
+}
+
+// Add floating animation to form groups on load
+window.addEventListener('load', () => {
+    const formGroups = document.querySelectorAll('.form-group');
+    formGroups.forEach((group, index) => {
+        group.style.animationDelay = `${index * 0.1}s`;
+        group.style.animation = 'slideRight 0.6s cubic-bezier(0.16,1,0.3,1) forwards';
+    });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>InternAI — Company Dashboard</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+:root {
+    --gold: #c9a96e;
+    --gold-light: #e8d5b0;
+    --gold-dark: #9a7a45;
+    --obsidian: #0a0a0f;
+    --deep: #10101a;
+    --surface: #14141f;
+    --surface2: #1c1c2e;
+    --surface3: #22223a;
+    --text: #f0ece3;
+    --text-muted: #8a8278;
+    --border: rgba(201,169,110,0.18);
+    --border-subtle: rgba(201,169,110,0.08);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--obsidian);
+    color: var(--text);
+    overflow-x: hidden;
+    min-height: 100vh;
+}
+
+/* ── AMBIENT BG ── */
+.bg-ambient { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+.bg-orb { position: absolute; border-radius: 50%; filter: blur(100px); animation: drift 15s ease-in-out infinite alternate; }
+.bg-orb-1 { width: 700px; height: 700px; background: radial-gradient(circle, rgba(201,169,110,0.12), transparent); top: -20%; right: -10%; animation-delay: 0s; }
+.bg-orb-2 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(42,79,201,0.08), transparent); bottom: 10%; left: -10%; animation-delay: -6s; }
+.bg-orb-3 { width: 300px; height: 300px; background: radial-gradient(circle, rgba(201,169,110,0.06), transparent); top: 50%; left: 40%; animation-delay: -11s; }
+
+@keyframes drift {
+    from { transform: translate(0,0) scale(1); }
+    to   { transform: translate(30px,-20px) scale(1.05); }
+}
+
+.bg-grain {
+    position: fixed; inset: 0; pointer-events: none; z-index: 1; opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ── NAVBAR ── */
+.navbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(24px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 72px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.logo-mark {
+    width: 38px;
+    height: 38px;
+    border: 1px solid var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    flex-shrink: 0;
+}
+.logo-mark::before { content: ''; position: absolute; top: -3px; left: -3px; width: 5px; height: 5px; background: var(--gold); }
+.logo-mark::after  { content: ''; position: absolute; bottom: -3px; right: -3px; width: 5px; height: 5px; background: var(--gold); }
+.logo-mark i { color: var(--gold); font-size: 14px; }
+
+.logo-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text);
+}
+.logo-text span { color: var(--gold); }
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.company-email {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    background: var(--surface2);
+    border: 1px solid var(--border-subtle);
+    padding: 8px 16px;
+    border-radius: 2px;
+    white-space: nowrap;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.company-email i { color: var(--gold); margin-right: 6px; }
+
+.logout-btn {
+    background: transparent;
+    border: 1px solid rgba(239,68,68,0.35);
+    padding: 8px 18px;
+    color: #fca5a5;
+    border-radius: 2px;
+    cursor: pointer;
+    font-size: 10px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+.logout-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(239,68,68,0.12);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+}
+.logout-btn:hover { color: #f87171; border-color: rgba(239,68,68,0.6); }
+.logout-btn:hover::before { transform: scaleX(1); }
+.logout-btn span { position: relative; z-index: 1; }
+
+/* ── HERO ── */
+.hero {
+    position: relative;
+    z-index: 2;
+    padding: 100px 60px 90px;
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        repeating-linear-gradient(0deg, transparent, transparent 60px, rgba(201,169,110,0.025) 60px, rgba(201,169,110,0.025) 61px),
+        repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(201,169,110,0.025) 60px, rgba(201,169,110,0.025) 61px);
+}
+
+.hero-inner {
+    position: relative;
+    z-index: 2;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 40px;
+}
+
+.hero-left { flex: 1; }
+
+.hero-eyebrow {
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.hero-eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 28px;
+    height: 1px;
+    background: var(--gold);
+}
+
+.hero h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 58px;
+    font-weight: 300;
+    line-height: 1.08;
+    letter-spacing: 0.01em;
+    color: var(--text);
+    margin-bottom: 20px;
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeUp 0.9s cubic-bezier(0.16,1,0.3,1) 0.1s forwards;
+}
+
+.hero h1 em {
+    font-style: italic;
+    color: var(--gold);
+}
+
+.hero-sub {
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    line-height: 1.8;
+    max-width: 480px;
+    opacity: 0;
+    animation: fadeUp 0.9s cubic-bezier(0.16,1,0.3,1) 0.25s forwards;
+}
+
+/* hero stats */
+.hero-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    opacity: 0;
+    animation: fadeUp 0.9s cubic-bezier(0.16,1,0.3,1) 0.4s forwards;
+}
+
+.stat-row {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding: 14px 24px;
+    border: 1px solid var(--border-subtle);
+    background: rgba(201,169,110,0.03);
+    position: relative;
+}
+.stat-row:first-child { border-bottom: none; }
+.stat-row:nth-child(2) { border-bottom: none; }
+
+.stat-val {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px;
+    font-weight: 400;
+    color: var(--gold);
+    letter-spacing: 0.02em;
+    min-width: 80px;
+}
+.stat-lbl {
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+/* ── MAIN CONTENT ── */
+.container {
+    position: relative;
+    z-index: 2;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 80px 60px;
+}
+
+/* Section label */
+.section-label {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 36px;
+}
+.section-label-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border-subtle);
+}
+.section-label-text {
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+.section-label-dot {
+    width: 4px;
+    height: 4px;
+    background: var(--gold);
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* ── HOW IT WORKS ── */
+.how-section {
+    margin-bottom: 80px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 48px;
+    position: relative;
+    overflow: hidden;
+}
+
+.how-section::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+.how-header {
+    margin-bottom: 42px;
+}
+
+.how-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 30px;
+    font-weight: 300;
+    color: var(--text);
+    letter-spacing: 0.04em;
+}
+.how-title span { color: var(--gold); }
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1px;
+    background: var(--border-subtle);
+}
+
+.info-item {
+    background: var(--deep);
+    padding: 32px 28px;
+    transition: background 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+
+.info-item:hover { background: rgba(201,169,110,0.04); }
+
+.info-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 40px;
+    font-weight: 300;
+    color: rgba(201,169,110,0.15);
+    line-height: 1;
+    margin-bottom: 16px;
+    display: block;
+}
+
+.info-icon-wrap {
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+.info-icon-wrap i { color: var(--gold); font-size: 14px; }
+
+.info-item h4 {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text);
+    margin-bottom: 10px;
+}
+
+.info-item p {
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--text-muted);
+    line-height: 1.75;
+    letter-spacing: 0.03em;
+}
+
+/* ── ACTION CARDS ── */
+.action-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 20px;
+}
+
+.action-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 48px;
+    transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(24px);
+}
+
+.action-card.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.action-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0;
+    transition: opacity 0.4s;
+}
+
+.action-card:hover { background: rgba(201,169,110,0.03); border-color: rgba(201,169,110,0.35); }
+.action-card:hover::before { opacity: 1; }
+
+/* card number watermark */
+.card-num {
+    position: absolute;
+    top: 24px;
+    right: 32px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 64px;
+    font-weight: 300;
+    color: rgba(201,169,110,0.06);
+    line-height: 1;
+    pointer-events: none;
+}
+
+.action-icon-wrap {
+    width: 56px;
+    height: 56px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 28px;
+    position: relative;
+    transition: border-color 0.3s;
+}
+.action-icon-wrap::after {
+    content: '';
+    position: absolute;
+    bottom: -3px; right: -3px;
+    width: 6px; height: 6px;
+    background: var(--gold);
+}
+.action-icon-wrap i { color: var(--gold); font-size: 18px; }
+.action-card:hover .action-icon-wrap { border-color: var(--gold); }
+
+.action-card h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 300;
+    color: var(--text);
+    letter-spacing: 0.04em;
+    margin-bottom: 14px;
+}
+
+.action-card p {
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--text-muted);
+    line-height: 1.85;
+    letter-spacing: 0.04em;
+    margin-bottom: 36px;
+}
+
+/* tags */
+.card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 32px;
+}
+.tag {
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    border: 1px solid var(--border-subtle);
+    padding: 4px 10px;
+    border-radius: 1px;
+}
+
+.action-btn {
+    width: 100%;
+    padding: 15px 24px;
+    background: transparent;
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    border-radius: 2px;
+    font-size: 10px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+.action-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gold);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+.action-btn:hover { color: var(--obsidian); }
+.action-btn:hover::before { transform: scaleX(1); }
+.action-btn span, .action-btn i { position: relative; z-index: 1; }
+
+/* ── FOOTER ── */
+.footer {
+    position: relative;
+    z-index: 2;
+    border-top: 1px solid var(--border-subtle);
+    padding: 28px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.footer-text {
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+.footer-dot {
+    width: 4px;
+    height: 4px;
+    background: var(--gold);
+    border-radius: 50%;
+    opacity: 0.4;
+}
+
+@keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+    .navbar { padding: 0 24px; }
+    .hero { padding: 70px 24px 60px; }
+    .hero-inner { flex-direction: column; align-items: flex-start; }
+    .hero h1 { font-size: 42px; }
+    .hero-stats { flex-direction: row; flex-wrap: wrap; }
+    .container { padding: 50px 24px; }
+    .how-section { padding: 36px 28px; }
+    .action-grid { grid-template-columns: 1fr; }
+    .action-card { padding: 36px 28px; }
+    .footer { padding: 24px; flex-direction: column; gap: 10px; text-align: center; }
+}
+
+@media (max-width: 480px) {
+    .hero h1 { font-size: 34px; }
+    .info-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="bg-ambient">
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+    <div class="bg-orb bg-orb-3"></div>
+</div>
+<div class="bg-grain"></div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <div class="logo">
+        <div class="logo-mark"><i class="fas fa-brain"></i></div>
+        <div class="logo-text">Intern<span>AI</span></div>
+    </div>
+    <div class="nav-actions">
+        <div class="company-email" id="companyEmail">
+            <i class="fas fa-circle-dot"></i> Loading...
+        </div>
+        <button class="logout-btn" onclick="logout()">
+            <span><i class="fas fa-arrow-right-from-bracket"></i> &nbsp;Logout</span>
+        </button>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-inner">
+        <div class="hero-left">
+            <div class="hero-eyebrow">Company Dashboard</div>
+            <h1>Your talent<br><em>command centre</em></h1>
+            <p class="hero-sub">Leverage AI-powered matching to discover exceptional interns. Post opportunities, manage pipelines, and build your future workforce — all from one refined platform.</p>
+        </div>
+
+        <div class="hero-stats">
+            <div class="stat-row">
+                <span class="stat-val">12K+</span>
+                <span class="stat-lbl">Active Candidates</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-val">98%</span>
+                <span class="stat-lbl">AI Match Rate</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-val">500+</span>
+                <span class="stat-lbl">Partner Companies</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- MAIN -->
+<div class="container">
+
+    <!-- HOW IT WORKS -->
+    <div class="section-label">
+        <div class="section-label-line"></div>
+        <div class="section-label-dot"></div>
+        <div class="section-label-text">Platform Overview</div>
+        <div class="section-label-dot"></div>
+        <div class="section-label-line"></div>
+    </div>
+
+    <div class="how-section">
+        <div class="how-header">
+            <div class="how-title">How <span>InternAI</span> works</div>
+        </div>
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="info-num">01</span>
+                <div class="info-icon-wrap"><i class="fas fa-plus"></i></div>
+                <h4>Post Opportunities</h4>
+                <p>Create detailed internship listings with skills, stipend, location, and multi-round selection criteria in minutes.</p>
+            </div>
+            <div class="info-item">
+                <span class="info-num">02</span>
+                <div class="info-icon-wrap"><i class="fas fa-brain"></i></div>
+                <h4>AI Matching Engine</h4>
+                <p>Our algorithm surfaces the highest-fit candidates from thousands of student profiles using skill and intent signals.</p>
+            </div>
+            <div class="info-item">
+                <span class="info-num">03</span>
+                <div class="info-icon-wrap"><i class="fas fa-pen-to-square"></i></div>
+                <h4>Full Control</h4>
+                <p>Edit, update, or remove your listings at any time. Complete ownership over your hiring pipeline and visibility.</p>
+            </div>
+            <div class="info-item">
+                <span class="info-num">04</span>
+                <div class="info-icon-wrap"><i class="fas fa-shield-halved"></i></div>
+                <h4>Secure & Private</h4>
+                <p>Only your company can manage your postings. Enterprise-grade security with role-based access control.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ACTION CARDS -->
+    <div class="section-label">
+        <div class="section-label-line"></div>
+        <div class="section-label-dot"></div>
+        <div class="section-label-text">Quick Actions</div>
+        <div class="section-label-dot"></div>
+        <div class="section-label-line"></div>
+    </div>
+
+    <div class="action-grid">
+        <div class="action-card" id="card1">
+            <div class="card-num">01</div>
+            <div class="action-icon-wrap">
+                <i class="fas fa-satellite-dish"></i>
+            </div>
+            <h3>Post New Internship</h3>
+            <p>Create compelling internship opportunities with full details — required skills, stipend, duration, location, and selection rounds — and broadcast to thousands of qualified candidates instantly.</p>
+            <div class="card-tags">
+                <span class="tag">AI-Powered Reach</span>
+                <span class="tag">Instant Publish</span>
+                <span class="tag">Custom Rounds</span>
+            </div>
+            <button class="action-btn" onclick="go('company-post-Internship.html')">
+                <i class="fas fa-plus"></i>
+                <span>Post Internship</span>
+            </button>
+        </div>
+
+        <div class="action-card" id="card2">
+            <div class="card-num">02</div>
+            <div class="action-icon-wrap">
+                <i class="fas fa-sliders"></i>
+            </div>
+            <h3>Manage Internships</h3>
+            <p>Review all active and past listings, make real-time edits, update availability, or remove postings. Full oversight of your hiring pipeline with detailed performance insights.</p>
+            <div class="card-tags">
+                <span class="tag">Full Editing</span>
+                <span class="tag">Live Updates</span>
+                <span class="tag">Analytics</span>
+            </div>
+            <button class="action-btn" onclick="go('edit-internship.html')">
+                <i class="fas fa-list-check"></i>
+                <span>Manage Internships</span>
+            </button>
+        </div>
+    </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <div class="footer-text">© 2025 InternAI &nbsp;·&nbsp; Intelligent Talent Platform</div>
+    <div class="footer-dot"></div>
+    <div class="footer-text">Enterprise Dashboard</div>
+</footer>
+
+<script>
+    const email = localStorage.getItem("companyEmail");
+    if (!email) {
+        window.location.href = "company-login.html";
+    }
+    document.getElementById("companyEmail").innerHTML = `<i class="fas fa-circle-dot" style="color:var(--gold)"></i> ${email || 'Company Account'}`;
+
+    function go(page) {
+        window.location.href = page;
+    }
+
+    function logout() {
+        if (confirm('Are you sure you want to logout?')) {
+            localStorage.removeItem("companyEmail");
+            window.location.href = "company-login.html";
+        }
+    }
+
+    // Intersection observer for card animations
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry, i) => {
+            if (entry.isIntersecting) {
+                setTimeout(() => {
+                    entry.target.classList.add('visible');
+                }, entry.target.id === 'card2' ? 150 : 0);
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll('.action-card').forEach(card => observer.observe(card));
+</script>
+
+</body>
+</html>

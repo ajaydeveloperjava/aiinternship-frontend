@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>InternAI — Featured Internships</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700;1,800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --black: #040507;
+  --white: #f5f3ef;
+  --gold: #c9a84c;
+  --gold2: #e8c97a;
+  --text: #f5f3ef;
+  --muted: rgba(245,243,239,0.42);
+  --muted2: rgba(245,243,239,0.65);
+  --border: rgba(245,243,239,0.07);
+  --card-bg: rgba(245,243,239,0.03);
+  --card-hover: rgba(245,243,239,0.055);
+  --green: #1db97a;
+  --green-soft: #4dd9a0;
+  --amber: #f59e0b;
+  --red: #ef4444;
+  --red-soft: #fca5a5;
+}
+
+html { scroll-behavior:smooth; }
+
+body {
+  font-family:'Outfit',sans-serif;
+  background:var(--black);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+  line-height:1.6;
+  cursor:none;
+}
+
+/* CURSOR */
+.cursor-dot {
+  width:7px; height:7px;
+  background:var(--white); border-radius:50%;
+  position:fixed; pointer-events:none; z-index:9999;
+  transform:translate(-50%,-50%);
+  mix-blend-mode:difference;
+}
+.cursor-ring {
+  width:32px; height:32px;
+  border:1.5px solid rgba(245,243,239,0.35);
+  border-radius:50%;
+  position:fixed; pointer-events:none; z-index:9998;
+  transform:translate(-50%,-50%);
+  transition:width 0.3s,height 0.3s,border-color 0.3s;
+  mix-blend-mode:difference;
+}
+
+/* CANVAS */
+#particles { position:fixed; inset:0; z-index:0; pointer-events:none; }
+
+/* GRID */
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image:
+    linear-gradient(rgba(201,168,76,0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201,168,76,0.022) 1px, transparent 1px);
+  background-size:64px 64px;
+  pointer-events:none; z-index:0;
+}
+
+/* BG WORD */
+.bg-word {
+  position:fixed; bottom:-60px; right:-30px;
+  font-family:'Playfair Display',serif;
+  font-size:280px; font-weight:900;
+  color:transparent;
+  -webkit-text-stroke:1px rgba(245,243,239,0.016);
+  white-space:nowrap; pointer-events:none; z-index:0;
+  letter-spacing:-12px; user-select:none;
+  transform:rotate(-6deg);
+}
+
+/* ─── HEADER ─── */
+.header {
+  position:sticky; top:0; z-index:100;
+  padding:0 52px; height:72px;
+  display:flex; align-items:center;
+  background:rgba(4,5,7,0.78);
+  backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);
+  animation:fadeDown 0.8s cubic-bezier(0.16,1,0.3,1) both;
+}
+
+.header::after {
+  content:'';
+  position:absolute; bottom:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg,transparent 5%,rgba(201,168,76,0.28) 40%,rgba(201,168,76,0.28) 60%,transparent 95%);
+}
+
+@keyframes fadeDown { from{opacity:0;transform:translateY(-16px);} to{opacity:1;transform:translateY(0);} }
+
+.header-inner {
+  max-width:1180px; width:100%; margin:0 auto;
+  display:flex; align-items:center; justify-content:space-between;
+}
+
+.brand { display:flex; align-items:center; gap:12px; text-decoration:none; }
+
+.brand-gem {
+  width:40px; height:40px;
+  background:linear-gradient(135deg,var(--gold),var(--gold2) 60%,#fff8e1);
+  border-radius:11px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:17px; color:var(--black);
+  box-shadow:0 0 28px rgba(201,168,76,0.4),0 0 56px rgba(201,168,76,0.1);
+  animation:gemGlow 3s ease-in-out infinite;
+}
+
+@keyframes gemGlow {
+  0%,100%{box-shadow:0 0 28px rgba(201,168,76,0.38),0 0 52px rgba(201,168,76,0.1);}
+  50%{box-shadow:0 0 42px rgba(201,168,76,0.56),0 0 76px rgba(201,168,76,0.18);}
+}
+
+.brand-name {
+  font-family:'Playfair Display',serif;
+  font-size:21px; font-weight:800; color:var(--white);
+}
+
+.brand-name em {
+  font-style:italic;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+}
+
+.header-tag {
+  font-size:10.5px; font-weight:700;
+  text-transform:uppercase; letter-spacing:1.8px; color:var(--muted);
+  display:flex; align-items:center; gap:7px;
+}
+
+.header-tag i { color:var(--gold); font-size:9px; }
+
+/* ─── PAGE HERO ─── */
+.page-hero {
+  position:relative; z-index:1;
+  padding:70px 52px 56px;
+  text-align:center;
+  border-bottom:1px solid var(--border);
+  background:radial-gradient(ellipse at top center, rgba(201,168,76,0.06) 0%, transparent 60%);
+  animation:fadeInUp 0.9s cubic-bezier(0.16,1,0.3,1) 0.1s both;
+}
+
+@keyframes fadeInUp { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
+
+.hero-eyebrow {
+  display:flex; align-items:center; justify-content:center; gap:14px;
+  margin-bottom:22px;
+}
+
+.hero-bar { width:44px; height:1px; }
+.hero-bar.l { background:linear-gradient(90deg,transparent,var(--gold)); }
+.hero-bar.r { background:linear-gradient(90deg,var(--gold),transparent); }
+
+.hero-eyebrow-lbl {
+  font-size:10.5px; font-weight:700;
+  text-transform:uppercase; letter-spacing:2.5px; color:var(--gold);
+}
+
+.page-hero h1 {
+  font-family:'Playfair Display',serif;
+  font-size:60px; font-weight:900;
+  letter-spacing:-2px; line-height:1.0;
+  margin-bottom:18px; color:var(--white);
+}
+
+.page-hero h1 em {
+  font-style:italic;
+  background:linear-gradient(120deg,var(--gold) 0%,var(--gold2) 55%,rgba(255,248,220,0.9) 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+}
+
+.page-hero p {
+  font-size:15px; color:var(--muted);
+  max-width:440px; margin:0 auto 34px; line-height:1.8;
+}
+
+.hero-stats {
+  display:flex; align-items:center; justify-content:center; gap:36px;
+}
+
+.h-stat { text-align:center; }
+
+.h-stat-val {
+  font-family:'Playfair Display',serif;
+  font-size:22px; font-weight:800;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+}
+
+.h-stat-lbl {
+  font-size:10px; color:var(--muted);
+  text-transform:uppercase; letter-spacing:1px; font-weight:600;
+}
+
+.h-stat-div { width:1px; height:28px; background:var(--border); }
+
+/* ─── CONTAINER ─── */
+.container {
+  max-width:1180px; margin:0 auto;
+  padding:52px 40px 80px;
+  position:relative; z-index:1;
+}
+
+/* ─── GRID ─── */
+.internships {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(360px,1fr));
+  gap:22px;
+}
+
+/* ─── CARD ─── */
+.card {
+  background:var(--card-bg);
+  border:1px solid var(--border);
+  border-radius:20px; padding:28px;
+  display:flex; flex-direction:column;
+  position:relative; overflow:hidden;
+  transition:all 0.4s cubic-bezier(0.16,1,0.3,1);
+  animation:cardReveal 0.6s cubic-bezier(0.16,1,0.3,1) both;
+  cursor:none;
+}
+
+@keyframes cardReveal { from{opacity:0;transform:translateY(24px);} to{opacity:1;transform:translateY(0);} }
+
+.card::before {
+  content:'';
+  position:absolute; top:0; left:0; right:0; height:1.5px;
+  background:linear-gradient(90deg,transparent,var(--gold),var(--gold2),transparent);
+  opacity:0.35; transition:opacity 0.4s;
+}
+
+.card::after {
+  content:'';
+  position:absolute; inset:0;
+  background:radial-gradient(ellipse at top left, rgba(201,168,76,0.06), transparent 60%);
+  opacity:0; transition:opacity 0.4s; pointer-events:none;
+}
+
+.card:hover {
+  transform:translateY(-6px);
+  border-color:rgba(201,168,76,0.22);
+  background:var(--card-hover);
+  box-shadow:0 30px 70px rgba(0,0,0,0.4), 0 0 0 1px rgba(201,168,76,0.08);
+}
+
+.card:hover::before { opacity:1; }
+.card:hover::after { opacity:1; }
+
+/* CARD HEAD */
+.card-head {
+  display:flex; align-items:flex-start;
+  justify-content:space-between; gap:14px;
+  margin-bottom:18px; position:relative; z-index:1;
+}
+
+.company-block { flex:1; }
+
+.company {
+  font-family:'Playfair Display',serif;
+  font-size:18px; font-weight:800;
+  color:var(--white); letter-spacing:-0.3px;
+  margin-bottom:5px; line-height:1.2;
+}
+
+.role {
+  font-size:12px; font-weight:600;
+  color:var(--gold); display:flex; align-items:center; gap:5px;
+}
+
+.role i { font-size:10px; opacity:0.7; }
+
+.company-avatar {
+  width:46px; height:46px; border-radius:13px;
+  background:linear-gradient(135deg,rgba(201,168,76,0.15),rgba(201,168,76,0.04));
+  border:1px solid rgba(201,168,76,0.2);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Playfair Display',serif;
+  font-size:17px; font-weight:800;
+  color:var(--gold); flex-shrink:0;
+  transition:0.35s;
+}
+
+.card:hover .company-avatar {
+  border-color:rgba(201,168,76,0.4);
+  box-shadow:0 0 18px rgba(201,168,76,0.14);
+}
+
+/* META */
+.meta {
+  display:flex; flex-wrap:wrap; gap:7px;
+  margin-bottom:20px; position:relative; z-index:1;
+}
+
+.meta span {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:4px 11px;
+  background:rgba(245,243,239,0.03);
+  border:1px solid var(--border);
+  border-radius:99px;
+  font-size:11.5px; color:var(--muted);
+  transition:0.25s;
+}
+
+.meta span i { font-size:9px; color:var(--gold); opacity:0.6; }
+
+.meta span:hover {
+  background:rgba(201,168,76,0.07);
+  border-color:rgba(201,168,76,0.22);
+  color:var(--white);
+}
+
+/* DEADLINE BADGE in meta — urgent coloring */
+.meta .deadline-badge {
+  background:rgba(239,68,68,0.08);
+  border-color:rgba(239,68,68,0.2);
+  color:rgba(252,165,165,0.85);
+}
+.meta .deadline-badge i { color:var(--red-soft); opacity:0.8; }
+.meta .deadline-badge:hover {
+  background:rgba(239,68,68,0.14);
+  border-color:rgba(239,68,68,0.36);
+  color:var(--red-soft);
+}
+
+/* when deadline is far — normal gold */
+.meta .deadline-safe {
+  background:rgba(201,168,76,0.07);
+  border-color:rgba(201,168,76,0.18);
+  color:rgba(232,201,122,0.85);
+}
+.meta .deadline-safe i { color:var(--gold2); opacity:0.8; }
+.meta .deadline-safe:hover {
+  background:rgba(201,168,76,0.14);
+  border-color:rgba(201,168,76,0.36);
+  color:var(--gold2);
+}
+
+/* CARD SECTION */
+.card-section {
+  margin-bottom:18px; position:relative; z-index:1;
+}
+
+.sec-title {
+  font-size:9.5px; font-weight:700;
+  text-transform:uppercase; letter-spacing:1.5px;
+  color:rgba(201,168,76,0.55);
+  margin-bottom:10px;
+  display:flex; align-items:center; gap:8px;
+}
+
+.sec-title::after {
+  content:''; flex:1; height:1px;
+  background:linear-gradient(90deg,var(--border),transparent);
+}
+
+.description {
+  font-size:13px; color:rgba(245,243,239,0.52);
+  line-height:1.75; padding:14px 16px;
+  background:rgba(245,243,239,0.02);
+  border:1px solid var(--border); border-radius:12px;
+  border-left:2px solid rgba(201,168,76,0.28);
+}
+
+/* SKILLS */
+.skills { display:flex; flex-wrap:wrap; gap:7px; }
+
+.skill {
+  padding:4px 12px; border-radius:99px;
+  font-size:11.5px; font-weight:600;
+  background:rgba(201,168,76,0.08);
+  color:var(--gold);
+  border:1px solid rgba(201,168,76,0.18);
+  transition:all 0.25s; cursor:default;
+}
+
+.skill:hover {
+  background:rgba(201,168,76,0.16);
+  border-color:rgba(201,168,76,0.36);
+  transform:translateY(-1px);
+  box-shadow:0 4px 14px rgba(201,168,76,0.14);
+}
+
+/* PROCESS */
+.process {
+  font-size:12.5px; color:rgba(245,243,239,0.52);
+  line-height:1.75; padding:14px 16px;
+  background:rgba(245,243,239,0.02);
+  border:1px solid var(--border); border-radius:12px;
+}
+
+.rounds-badge {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:3px 10px; margin-bottom:10px;
+  background:rgba(245,158,11,0.1);
+  border:1px solid rgba(245,158,11,0.2);
+  border-radius:99px;
+  font-size:10.5px; font-weight:700;
+  color:var(--amber); letter-spacing:0.3px;
+}
+
+/* BUTTONS */
+.buttons {
+  display:flex; gap:10px;
+  margin-top:auto; padding-top:20px;
+  border-top:1px solid var(--border);
+  position:relative; z-index:1;
+}
+
+.btn {
+  flex:1; padding:11px 14px; border-radius:11px;
+  font-family:'Outfit',sans-serif;
+  font-size:12.5px; font-weight:700;
+  text-decoration:none;
+  display:flex; align-items:center; justify-content:center; gap:7px;
+  position:relative; overflow:hidden;
+  transition:all 0.35s cubic-bezier(0.16,1,0.3,1);
+  letter-spacing:0.3px; cursor:none;
+}
+
+.btn::before {
+  content:'';
+  position:absolute; top:0; left:-100%; width:100%; height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent);
+  transition:left 0.5s;
+}
+
+.btn:hover::before { left:100%; }
+
+.apply {
+  background:linear-gradient(135deg,var(--green),var(--green-soft));
+  box-shadow:0 6px 20px rgba(29,185,122,0.22);
+  color:var(--black); font-weight:700;
+}
+
+.apply:hover {
+  transform:translateY(-2px);
+  box-shadow:0 14px 34px rgba(29,185,122,0.38);
+}
+
+.ai-btn {
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  box-shadow:0 6px 20px rgba(201,168,76,0.22);
+  color:var(--black);
+}
+
+.ai-btn:hover {
+  transform:translateY(-2px);
+  box-shadow:0 14px 34px rgba(201,168,76,0.38);
+}
+
+/* EMPTY */
+.empty {
+  text-align:center; padding:90px 20px;
+  grid-column:1/-1;
+}
+
+.empty-icon {
+  width:80px; height:80px; margin:0 auto 24px;
+  background:var(--card-bg);
+  border:1px solid rgba(201,168,76,0.15);
+  border-radius:20px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:30px; color:var(--gold);
+}
+
+.empty h3 {
+  font-family:'Playfair Display',serif;
+  font-size:26px; font-weight:800;
+  color:var(--white); margin-bottom:12px; letter-spacing:-0.5px;
+}
+
+.empty p { font-size:14px; color:var(--muted); max-width:380px; margin:0 auto; line-height:1.8; }
+
+/* ─── FOOTER ─── */
+.page-footer {
+  position:relative; z-index:1;
+  border-top:1px solid var(--border); padding:28px 52px;
+  display:flex; align-items:center; justify-content:space-between;
+  background:rgba(4,5,7,0.5); backdrop-filter:blur(16px);
+}
+
+.footer-brand {
+  font-family:'Playfair Display',serif;
+  font-size:16px; font-weight:800; color:var(--white);
+}
+
+.footer-brand em {
+  font-style:italic;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+}
+
+.footer-copy { font-size:11.5px; color:var(--muted); }
+
+.footer-links { display:flex; gap:20px; }
+.footer-links a { font-size:11.5px; color:var(--muted); text-decoration:none; transition:color 0.2s; }
+.footer-links a:hover { color:var(--gold); }
+
+/* RESPONSIVE */
+@media(max-width:900px) {
+  .header,.page-footer { padding-left:24px; padding-right:24px; }
+  .page-hero { padding:48px 24px 40px; }
+  .container { padding:32px 20px 60px; }
+  .internships { grid-template-columns:1fr; gap:18px; }
+  .page-hero h1 { font-size:38px; }
+  .hero-stats { gap:20px; }
+  .page-footer { flex-direction:column; gap:12px; text-align:center; padding:24px; }
+}
+
+@media(max-width:600px) {
+  .page-hero h1 { font-size:30px; }
+  .buttons { flex-direction:column; }
+}
+
+@media(prefers-reduced-motion:reduce) {
+  *,*::before,*::after { animation-duration:0.01ms !important; transition-duration:0.01ms !important; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<canvas id="particles"></canvas>
+<div class="bg-word">Explore</div>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <a class="brand" href="student-dashboard.html">
+      <div class="brand-gem"><i class="fas fa-brain"></i></div>
+      <div class="brand-name">Intern<em>AI</em></div>
+    </a>
+    <div class="header-tag">
+      <i class="fas fa-briefcase"></i>
+      Internship Board
+    </div>
+  </div>
+</header>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="hero-eyebrow">
+    <div class="hero-bar l"></div>
+    <div class="hero-eyebrow-lbl">Live Opportunities</div>
+    <div class="hero-bar r"></div>
+  </div>
+  <h1>Featured <em>Internships</em></h1>
+  <p>Explore curated opportunities matched to your skills using AI-powered analysis and real-time selection scoring.</p>
+  <div class="hero-stats">
+    <div class="h-stat">
+      <div class="h-stat-val">5K+</div>
+      <div class="h-stat-lbl">Internships</div>
+    </div>
+    <div class="h-stat-div"></div>
+    <div class="h-stat">
+      <div class="h-stat-val">98%</div>
+      <div class="h-stat-lbl">Match Rate</div>
+    </div>
+    <div class="h-stat-div"></div>
+    <div class="h-stat">
+      <div class="h-stat-val">2.4x</div>
+      <div class="h-stat-lbl">Faster Placed</div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="container">
+  <div id="internships" class="internships"></div>
+</div>
+
+<!-- FOOTER -->
+<footer class="page-footer">
+  <div class="footer-brand">Intern<em>AI</em></div>
+  <div class="footer-copy">© 2026 InternAI | Smart Career Growth Powered by AI</div>
+  <div class="footer-links">
+    <a href="#">Privacy</a>
+    <a href="#">Terms</a>
+    <a href="#">Support</a>
+  </div>
+</footer>
+
+<script>
+/* ─── CURSOR ─── */
+const dot  = document.getElementById('cursorDot');
+const ring = document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX; my=e.clientY;
+  dot.style.left=mx+'px'; dot.style.top=my+'px';
+});
+
+(function loopRing(){
+  rx+=(mx-rx)*0.11; ry+=(my-ry)*0.11;
+  ring.style.left=rx+'px'; ring.style.top=ry+'px';
+  requestAnimationFrame(loopRing);
+})();
+
+function cursorBig(){ ring.style.width='52px'; ring.style.height='52px'; ring.style.borderColor='rgba(201,168,76,0.6)'; }
+function cursorNorm(){ ring.style.width='32px'; ring.style.height='32px'; ring.style.borderColor='rgba(245,243,239,0.35)'; }
+
+/* ─── PARTICLES ─── */
+const cvs=document.getElementById('particles');
+const ctx=cvs.getContext('2d');
+let W,H,pts=[];
+
+function resize(){ W=cvs.width=window.innerWidth; H=cvs.height=window.innerHeight; }
+resize(); window.addEventListener('resize',resize);
+
+function Pt(){
+  this.x=Math.random()*W; this.y=Math.random()*H;
+  this.s=Math.random()*1.0+0.3;
+  this.vx=(Math.random()-.5)*0.15; this.vy=(Math.random()-.5)*0.15;
+  this.a=Math.random()*0.32+0.07;
+  this.col=Math.random()>.55?`rgba(201,168,76,${this.a})`:`rgba(245,243,239,${this.a})`;
+}
+Pt.prototype.tick=function(){ this.x+=this.vx; this.y+=this.vy; if(this.x<0)this.x=W; if(this.x>W)this.x=0; if(this.y<0)this.y=H; if(this.y>H)this.y=0; };
+
+for(let i=0;i<90;i++) pts.push(new Pt());
+
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  for(let i=0;i<pts.length;i++){
+    for(let j=i+1;j<pts.length;j++){
+      const dx=pts[i].x-pts[j].x, dy=pts[i].y-pts[j].y;
+      const d=Math.sqrt(dx*dx+dy*dy);
+      if(d<105){
+        ctx.beginPath();
+        ctx.strokeStyle=`rgba(201,168,76,${0.05*(1-d/105)})`;
+        ctx.lineWidth=0.5;
+        ctx.moveTo(pts[i].x,pts[i].y); ctx.lineTo(pts[j].x,pts[j].y);
+        ctx.stroke();
+      }
+    }
+  }
+  pts.forEach(p=>{ p.tick(); ctx.beginPath(); ctx.arc(p.x,p.y,p.s,0,Math.PI*2); ctx.fillStyle=p.col; ctx.fill(); });
+  requestAnimationFrame(draw);
+}
+draw();
+
+/* ─── DEADLINE HELPER ─── */
+function formatDeadline(dateStr) {
+  if (!dateStr) return null;
+
+  const deadline = new Date(dateStr);
+  const now = new Date();
+  const diffMs = deadline - now;
+  const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+  // Format display date
+  const formatted = deadline.toLocaleDateString('en-IN', {
+    day: 'numeric', month: 'short', year: 'numeric'
+  });
+
+  let label, urgent;
+
+  if (diffDays < 0) {
+    label = `Closed`;
+    urgent = true;
+  } else if (diffDays === 0) {
+    label = `Closes Today`;
+    urgent = true;
+  } else if (diffDays <= 7) {
+    label = `${diffDays}d left — ${formatted}`;
+    urgent = true;
+  } else {
+    label = `Deadline: ${formatted}`;
+    urgent = false;
+  }
+
+  return { label, urgent };
+}
+
+/* ─── FETCH INTERNSHIPS ─── */
+fetch("http://localhost:8080/api/internships/all")
+.then(res => res.json())
+.then(data => {
+
+    const container = document.getElementById("internships");
+    container.innerHTML = "";
+
+    if(!data || data.length === 0){
+        container.innerHTML = `
+            <div class="empty">
+                <div class="empty-icon"><i class="fas fa-seedling"></i></div>
+                <h3>No internships available right now</h3>
+                <p>Companies will post new internships soon.<br>Please check back later.</p>
+            </div>
+        `;
+        return;
+    }
+
+    data.forEach((intern, index) => {
+
+        const skills = intern.requiredSkills
+            ? intern.requiredSkills.split(",").map(s => s.trim())
+            : [];
+
+        // Build deadline badge HTML
+        let deadlineBadge = '';
+        const dl = formatDeadline(intern.applicationDeadline);
+        if (dl) {
+            const cls = dl.urgent ? 'deadline-badge' : 'deadline-safe';
+            const icon = dl.urgent ? 'fa-fire' : 'fa-calendar-alt';
+            deadlineBadge = `<span class="${cls}"><i class="fas ${icon}"></i> ${dl.label}</span>`;
+        }
+
+        const div = document.createElement("div");
+        div.className = "card";
+        div.style.animationDelay = `${index * 0.07}s`;
+
+        const initials = intern.companyName
+            ? intern.companyName.substring(0, 2).toUpperCase()
+            : "?";
+
+        div.innerHTML = `
+            <div class="card-head">
+                <div class="company-block">
+                    <div class="company">${intern.companyName}</div>
+                    <div class="role"><i class="fas fa-user-tie"></i> ${intern.role}</div>
+                </div>
+                <div class="company-avatar">${initials}</div>
+            </div>
+
+            <div class="meta">
+                <span><i class="fas fa-map-marker-alt"></i> ${intern.location || "Not specified"}</span>
+                <span><i class="fas fa-clock"></i> ${intern.duration || "Not specified"}</span>
+                <span><i class="fas fa-graduation-cap"></i> CGPA ≥ ${intern.cgpa ?? "Any"}</span>
+                <span><i class="fas fa-briefcase"></i> ${intern.roleType || "Not specified"}</span>
+                <span><i class="fas fa-home"></i> ${intern.internshipMode || "Not specified"}</span>
+                <span><i class="fas fa-dollar-sign"></i> ${intern.stipendProvided ? intern.stipend : "Unpaid"}</span>
+                ${deadlineBadge}
+            </div>
+
+            <div class="card-section">
+                <div class="sec-title"><i class="fas fa-file-alt"></i> Description</div>
+                <div class="description">
+                    ${intern.internshipDescription || "No description provided"}
+                </div>
+            </div>
+
+            <div class="card-section">
+                <div class="sec-title"><i class="fas fa-tools"></i> Required Skills</div>
+                <div class="skills">
+                    ${skills.length > 0
+                        ? skills.map(skill => `<span class="skill">${skill}</span>`).join("")
+                        : "<span class='skill'>Not specified</span>"
+                    }
+                </div>
+            </div>
+
+            <div class="card-section">
+                <div class="sec-title"><i class="fas fa-filter"></i> Selection Process</div>
+                <div class="process">
+                    <div class="rounds-badge"><i class="fas fa-layer-group"></i> ${intern.totalRounds ?? "?"} Rounds</div>
+                    ${intern.selectionProcess || "Selection process not provided"}
+                </div>
+            </div>
+
+            <div class="buttons">
+                <a href="${intern.applyLink}" target="_blank" class="btn apply">
+                    <i class="fas fa-external-link-alt"></i> Apply Now
+                </a>
+                <a href="resume-check.html?internshipId=${intern.id}" class="btn ai-btn">
+                    <i class="fas fa-robot"></i> AI Screening
+                </a>
+            </div>
+        `;
+
+        div.addEventListener('mouseenter', cursorBig);
+        div.addEventListener('mouseleave', cursorNorm);
+
+        container.appendChild(div);
+    });
+})
+.catch(() => {
+    document.getElementById("internships").innerHTML = `
+        <div class="empty">
+            <div class="empty-icon"><i class="fas fa-exclamation-triangle"></i></div>
+            <h3>Unable to load internships</h3>
+            <p>Please try again later.</p>
+        </div>
+    `;
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>InternAI — Select Your Domains</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --gold: #c9a96e;
+    --gold-light: #e8d5b0;
+    --gold-dark: #9a7a45;
+    --obsidian: #0a0a0f;
+    --deep: #10101a;
+    --surface: #14141f;
+    --surface2: #1c1c2e;
+    --text: #f0ece3;
+    --text-muted: #8a8278;
+    --border: rgba(201,169,110,0.18);
+    --border-subtle: rgba(201,169,110,0.08);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--obsidian);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    overflow-x: hidden;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* ── AMBIENT ── */
+.bg-ambient { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+.bg-orb { position: absolute; border-radius: 50%; filter: blur(90px); animation: drift 14s ease-in-out infinite alternate; }
+.bg-orb-1 { width: 550px; height: 550px; background: radial-gradient(circle, rgba(201,169,110,0.1), transparent); top: -15%; right: -8%; }
+.bg-orb-2 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(42,79,201,0.08), transparent); bottom: -10%; left: -6%; animation-delay: -6s; }
+.bg-orb-3 { width: 250px; height: 250px; background: radial-gradient(circle, rgba(201,169,110,0.05), transparent); top: 40%; left: 35%; animation-delay: -11s; }
+
+@keyframes drift {
+    from { transform: translate(0,0) scale(1); }
+    to   { transform: translate(22px,-16px) scale(1.04); }
+}
+
+.bg-grain {
+    position: fixed; inset: 0; pointer-events: none; z-index: 1; opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ── PROGRESS ── */
+.progress-track {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    height: 1px;
+    background: rgba(201,169,110,0.1);
+}
+.progress-fill {
+    height: 100%;
+    width: 33%;
+    background: linear-gradient(90deg, var(--gold-dark), var(--gold), var(--gold-light));
+    position: relative;
+    transition: width 0.6s ease;
+}
+.progress-fill::after {
+    content: '';
+    position: absolute;
+    right: 0; top: -2px;
+    width: 6px; height: 6px;
+    background: var(--gold);
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(201,169,110,0.6);
+}
+
+/* ── STEP INDICATOR ── */
+.step-row {
+    position: relative; z-index: 10;
+    display: flex; align-items: center; gap: 0;
+    margin-bottom: 40px;
+    opacity: 0; animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.1s forwards;
+}
+
+.step {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+}
+
+.step-circle {
+    width: 32px; height: 32px;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 600; letter-spacing: 0.05em;
+    color: var(--text-muted);
+    transition: all 0.3s;
+    position: relative;
+}
+
+.step.active .step-circle {
+    border-color: var(--gold);
+    color: var(--gold);
+    box-shadow: 0 0 12px rgba(201,169,110,0.2);
+}
+
+.step.active .step-circle::after {
+    content: '';
+    position: absolute; inset: -4px;
+    border: 1px solid rgba(201,169,110,0.2);
+    border-radius: 50%;
+}
+
+.step-lbl {
+    font-size: 8px; font-weight: 500;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--text-muted);
+}
+.step.active .step-lbl { color: var(--gold); }
+
+.step-connector {
+    width: 60px; height: 1px;
+    background: var(--border-subtle);
+    margin: 0 8px;
+    margin-bottom: 18px;
+}
+
+/* ── CARD ── */
+.card {
+    position: relative; z-index: 10;
+    width: 100%; max-width: 560px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+    opacity: 0; transform: translateY(28px);
+    animation: fadeUp 0.85s cubic-bezier(0.16,1,0.3,1) 0.2s forwards;
+}
+
+.card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+@keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* card header */
+.card-header {
+    padding: 36px 40px 28px;
+    border-bottom: 1px solid var(--border-subtle);
+    position: relative;
+}
+
+.card-eyebrow {
+    font-size: 9px; font-weight: 500;
+    letter-spacing: 0.32em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 10px;
+    display: flex; align-items: center; gap: 10px;
+}
+.card-eyebrow::before {
+    content: ''; width: 20px; height: 1px; background: var(--gold);
+}
+
+.card-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px; font-weight: 300;
+    color: var(--text); letter-spacing: 0.03em; line-height: 1.1;
+}
+.card-title em { font-style: italic; color: var(--gold); }
+
+.card-sub {
+    margin-top: 6px;
+    font-size: 11px; font-weight: 300;
+    color: var(--text-muted); letter-spacing: 0.07em; line-height: 1.7;
+}
+
+/* selection count */
+.selection-count {
+    position: absolute; top: 36px; right: 40px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 36px; font-weight: 300;
+    color: rgba(201,169,110,0.15); line-height: 1;
+    transition: color 0.4s;
+    pointer-events: none;
+    min-width: 48px; text-align: right;
+}
+.selection-count.has-selection { color: rgba(201,169,110,0.5); }
+
+/* domains list */
+.domains-wrapper {
+    padding: 24px 40px;
+    max-height: 380px;
+    overflow-y: auto;
+}
+
+.domains-wrapper::-webkit-scrollbar { width: 3px; }
+.domains-wrapper::-webkit-scrollbar-track { background: transparent; }
+.domains-wrapper::-webkit-scrollbar-thumb { background: rgba(201,169,110,0.2); border-radius: 2px; }
+.domains-wrapper::-webkit-scrollbar-thumb:hover { background: rgba(201,169,110,0.4); }
+
+/* domain item */
+.domain-item {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 4px;
+    cursor: pointer;
+    position: relative;
+    user-select: none;
+}
+
+.domain-item input[type="checkbox"] {
+    position: absolute; opacity: 0; pointer-events: none;
+}
+
+.domain-tile {
+    display: flex; align-items: center; gap: 14px;
+    width: 100%;
+    padding: 13px 16px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.domain-tile::before {
+    content: '';
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 2px; background: var(--gold);
+    transform: scaleY(0); transform-origin: bottom;
+    transition: transform 0.3s cubic-bezier(0.16,1,0.3,1);
+}
+
+.domain-item:hover .domain-tile {
+    background: rgba(201,169,110,0.04);
+    border-color: var(--border-subtle);
+}
+
+.domain-item input:checked ~ .domain-tile {
+    background: rgba(201,169,110,0.06);
+    border-color: rgba(201,169,110,0.3);
+}
+
+.domain-item input:checked ~ .domain-tile::before {
+    transform: scaleY(1);
+}
+
+/* custom checkbox box */
+.check-box {
+    width: 16px; height: 16px;
+    border: 1px solid rgba(201,169,110,0.3);
+    border-radius: 1px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.25s;
+    background: transparent;
+}
+
+.domain-item input:checked ~ .domain-tile .check-box {
+    background: var(--gold);
+    border-color: var(--gold);
+}
+
+.check-box svg {
+    width: 9px; height: 9px;
+    opacity: 0; transform: scale(0.5);
+    transition: all 0.2s ease;
+}
+
+.domain-item input:checked ~ .domain-tile .check-box svg {
+    opacity: 1; transform: scale(1);
+}
+
+/* domain icon */
+.domain-icon {
+    width: 32px; height: 32px; flex-shrink: 0;
+    border: 1px solid var(--border-subtle);
+    border-radius: 2px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    background: var(--surface2);
+    transition: border-color 0.25s;
+}
+
+.domain-item input:checked ~ .domain-tile .domain-icon {
+    border-color: rgba(201,169,110,0.3);
+}
+
+.domain-name {
+    font-size: 12px; font-weight: 400;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    flex: 1;
+    transition: color 0.25s;
+}
+
+.domain-item input:checked ~ .domain-tile .domain-name {
+    color: var(--text);
+    font-weight: 500;
+}
+
+/* domain tag */
+.domain-tag {
+    font-size: 8px; font-weight: 500;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--text-muted);
+    border: 1px solid var(--border-subtle);
+    padding: 3px 8px; border-radius: 1px;
+    opacity: 0;
+    transition: opacity 0.25s;
+}
+.domain-item input:checked ~ .domain-tile .domain-tag {
+    opacity: 1; color: var(--gold); border-color: rgba(201,169,110,0.25);
+}
+
+/* ── CARD FOOTER ── */
+.card-footer {
+    padding: 20px 40px 32px;
+    border-top: 1px solid var(--border-subtle);
+}
+
+.footer-row {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 14px;
+}
+
+.selected-label {
+    font-size: 9px; font-weight: 500;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.selected-pills {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    min-height: 20px;
+}
+
+.pill {
+    font-size: 8px; font-weight: 500;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--gold);
+    background: rgba(201,169,110,0.07);
+    border: 1px solid rgba(201,169,110,0.2);
+    padding: 3px 9px; border-radius: 1px;
+    animation: pillIn 0.2s ease forwards;
+}
+
+@keyframes pillIn {
+    from { opacity: 0; transform: scale(0.85); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+/* next button */
+.next-btn {
+    width: 100%; padding: 15px 24px;
+    background: transparent;
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    border-radius: 2px;
+    font-size: 10px; font-family: 'Montserrat', sans-serif;
+    font-weight: 600; letter-spacing: 0.32em; text-transform: uppercase;
+    cursor: pointer; position: relative; overflow: hidden;
+    transition: color 0.4s;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+}
+
+.next-btn::before {
+    content: ''; position: absolute; inset: 0;
+    background: var(--gold);
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+
+.next-btn:not(:disabled):hover { color: var(--obsidian); }
+.next-btn:not(:disabled):hover::before { transform: scaleX(1); }
+.next-btn span, .next-btn svg { position: relative; z-index: 1; }
+
+.next-btn:disabled {
+    opacity: 0.3; cursor: not-allowed;
+    color: var(--text-muted); border-color: rgba(201,169,110,0.15);
+}
+
+/* hint text */
+.hint {
+    text-align: center; margin-top: 12px;
+    font-size: 9px; letter-spacing: 0.14em;
+    color: var(--text-muted);
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+    .card-header, .domains-wrapper, .card-footer { padding-left: 24px; padding-right: 24px; }
+    .card-title { font-size: 26px; }
+    .step-connector { width: 36px; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="bg-ambient">
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+    <div class="bg-orb bg-orb-3"></div>
+</div>
+<div class="bg-grain"></div>
+
+<!-- PROGRESS -->
+<div class="progress-track">
+    <div class="progress-fill" id="progressFill"></div>
+</div>
+
+<!-- STEP INDICATOR -->
+<div class="step-row">
+    <div class="step active">
+        <div class="step-circle">01</div>
+        <div class="step-lbl">Domains</div>
+    </div>
+    <div class="step-connector"></div>
+    <div class="step">
+        <div class="step-circle">02</div>
+        <div class="step-lbl">Skills</div>
+    </div>
+    <div class="step-connector"></div>
+    <div class="step">
+        <div class="step-circle">03</div>
+        <div class="step-lbl">Profile</div>
+    </div>
+</div>
+
+<!-- CARD -->
+<div class="card">
+
+    <div class="card-header">
+        <div class="card-eyebrow">Step 1 of 3</div>
+        <div class="card-title">Your <em>domains</em><br>of interest</div>
+        <div class="card-sub">Choose the fields that resonate with your ambition. We'll surface the most relevant internships for you.</div>
+        <div class="selection-count" id="selCount">0</div>
+    </div>
+
+    <div class="domains-wrapper" id="domainsWrapper">
+
+        <label class="domain-item">
+            <input type="checkbox" value="AI">
+            <div class="domain-tile">
+                <div class="check-box">
+                    <svg viewBox="0 0 10 8" fill="none"><polyline points="1,4 4,7 9,1" stroke="#0a0a0f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="domain-icon">🤖</div>
+                <span class="domain-name">AI & Machine Learning</span>
+                <span class="domain-tag">Selected</span>
+            </div>
+        </label>
+
+        <label class="domain-item">
+            <input type="checkbox" value="Web Development">
+            <div class="domain-tile">
+                <div class="check-box">
+                    <svg viewBox="0 0 10 8" fill="none"><polyline points="1,4 4,7 9,1" stroke="#0a0a0f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="domain-icon">🌐</div>
+                <span class="domain-name">Web Development</span>
+                <span class="domain-tag">Selected</span>
+            </div>
+        </label>
+
+        <label class="domain-item">
+            <input type="checkbox" value="Cyber Security">
+            <div class="domain-tile">
+                <div class="check-box">
+                    <svg viewBox="0 0 10 8" fill="none"><polyline points="1,4 4,7 9,1" stroke="#0a0a0f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="domain-icon">🔒</div>
+                <span class="domain-name">Cyber Security</span>
+                <span class="domain-tag">Selected</span>
+            </div>
+        </label>
+
+        <label class="domain-item">
+            <input type="checkbox" value="Cloud">
+            <div class="domain-tile">
+                <div class="check-box">
+                    <svg viewBox="0 0 10 8" fill="none"><polyline points="1,4 4,7 9,1" stroke="#0a0a0f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="domain-icon">☁️</div>
+                <span class="domain-name">Cloud Computing</span>
+                <span class="domain-tag">Selected</span>
+            </div>
+        </label>
+
+        <label class="domain-item">
+            <input type="checkbox" value="Data Science">
+            <div class="domain-tile">
+                <div class="check-box">
+                    <svg viewBox="0 0 10 8" fill="none"><polyline points="1,4 4,7 9,1" stroke="#0a0a0f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="domain-icon">📊</div>
+                <span class="domain-name">Data Science</span>
+                <span class="domain-tag">Selected</span>
+            </div>
+        </label>
+
+        <label class="domain-item">
+            <input type="checkbox" value="Mobile Development">
+            <div class="domain-tile">
+                <div class="check-box">
+                    <svg viewBox="0 0 10 8" fill="none"><polyline points="1,4 4,7 9,1" stroke="#0a0a0f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="domain-icon">📱</div>
+                <span class="domain-name">Mobile Development</span>
+                <span class="domain-tag">Selected</span>
+            </div>
+        </label>
+
+        <label class="domain-item">
+            <input type="checkbox" value="DevOps">
+            <div class="domain-tile">
+                <div class="check-box">
+                    <svg viewBox="0 0 10 8" fill="none"><polyline points="1,4 4,7 9,1" stroke="#0a0a0f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="domain-icon">⚙️</div>
+                <span class="domain-name">DevOps</span>
+                <span class="domain-tag">Selected</span>
+            </div>
+        </label>
+
+        <label class="domain-item">
+            <input type="checkbox" value="Blockchain">
+            <div class="domain-tile">
+                <div class="check-box">
+                    <svg viewBox="0 0 10 8" fill="none"><polyline points="1,4 4,7 9,1" stroke="#0a0a0f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="domain-icon">🔗</div>
+                <span class="domain-name">Blockchain</span>
+                <span class="domain-tag">Selected</span>
+            </div>
+        </label>
+
+        <label class="domain-item">
+            <input type="checkbox" value="IoT">
+            <div class="domain-tile">
+                <div class="check-box">
+                    <svg viewBox="0 0 10 8" fill="none"><polyline points="1,4 4,7 9,1" stroke="#0a0a0f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="domain-icon">🌐</div>
+                <span class="domain-name">Internet of Things</span>
+                <span class="domain-tag">Selected</span>
+            </div>
+        </label>
+
+        <label class="domain-item">
+            <input type="checkbox" value="Game Development">
+            <div class="domain-tile">
+                <div class="check-box">
+                    <svg viewBox="0 0 10 8" fill="none"><polyline points="1,4 4,7 9,1" stroke="#0a0a0f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="domain-icon">🎮</div>
+                <span class="domain-name">Game Development</span>
+                <span class="domain-tag">Selected</span>
+            </div>
+        </label>
+
+        <label class="domain-item">
+            <input type="checkbox" value="UI/UX Design">
+            <div class="domain-tile">
+                <div class="check-box">
+                    <svg viewBox="0 0 10 8" fill="none"><polyline points="1,4 4,7 9,1" stroke="#0a0a0f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="domain-icon">🎨</div>
+                <span class="domain-name">UI / UX Design</span>
+                <span class="domain-tag">Selected</span>
+            </div>
+        </label>
+
+        <label class="domain-item">
+            <input type="checkbox" value="Testing QA">
+            <div class="domain-tile">
+                <div class="check-box">
+                    <svg viewBox="0 0 10 8" fill="none"><polyline points="1,4 4,7 9,1" stroke="#0a0a0f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="domain-icon">🧪</div>
+                <span class="domain-name">Testing & QA</span>
+                <span class="domain-tag">Selected</span>
+            </div>
+        </label>
+
+    </div>
+
+    <div class="card-footer">
+        <div class="footer-row">
+            <span class="selected-label">Selected</span>
+            <div class="selected-pills" id="pills"></div>
+        </div>
+
+        <button class="next-btn" id="nextBtn" disabled onclick="nextPage()">
+            <span>Continue to Next Step</span>
+            <svg width="14" height="10" viewBox="0 0 14 10" fill="none">
+                <path d="M1 5h12M8 1l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+
+        <div class="hint">Select at least one domain to continue</div>
+    </div>
+
+</div>
+
+<script>
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    const nextBtn    = document.getElementById('nextBtn');
+    const pills      = document.getElementById('pills');
+    const selCount   = document.getElementById('selCount');
+
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', updateUI);
+    });
+
+    function updateUI() {
+        const checked = [...checkboxes].filter(cb => cb.checked);
+        const count   = checked.length;
+
+        // update counter
+        selCount.textContent = count;
+        selCount.classList.toggle('has-selection', count > 0);
+
+        // update button
+        nextBtn.disabled = count === 0;
+
+        // update pills
+        pills.innerHTML = '';
+        checked.forEach(cb => {
+            const pill = document.createElement('span');
+            pill.className = 'pill';
+            pill.textContent = cb.value;
+            pills.appendChild(pill);
+        });
+
+        // update progress width
+        const pct = Math.min(33 + (count / checkboxes.length) * 20, 50);
+        document.getElementById('progressFill').style.width = pct + '%';
+    }
+
+    function nextPage() {
+        const selected = [...checkboxes].filter(cb => cb.checked).map(cb => cb.value);
+        if (selected.length === 0) { alert("Select at least one domain"); return; }
+        localStorage.setItem("domains", selected.join(","));
+        document.body.style.opacity = '0';
+        document.body.style.transform = 'scale(0.97)';
+        setTimeout(() => window.location.href = "survey2.html", 300);
+    }
+</script>
+
+</body>
+</html>

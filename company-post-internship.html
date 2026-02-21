@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>InternAI — Post Internship</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+:root {
+    --gold: #c9a96e;
+    --gold-light: #e8d5b0;
+    --gold-dark: #9a7a45;
+    --obsidian: #0a0a0f;
+    --deep: #10101a;
+    --surface: #14141f;
+    --surface2: #1c1c2e;
+    --surface3: #22223a;
+    --text: #f0ece3;
+    --text-muted: #8a8278;
+    --border: rgba(201,169,110,0.2);
+    --border-subtle: rgba(201,169,110,0.08);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--obsidian);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 40px 20px 60px;
+    overflow-x: hidden;
+}
+
+/* ambient */
+.bg-ambient { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+.bg-orb { position: absolute; border-radius: 50%; filter: blur(100px); animation: drift 14s ease-in-out infinite alternate; }
+.bg-orb-1 { width: 600px; height: 600px; background: radial-gradient(circle, rgba(201,169,110,0.1), transparent); top: -20%; right: -10%; }
+.bg-orb-2 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(42,79,201,0.07), transparent); bottom: 0; left: -5%; animation-delay: -7s; }
+.bg-grain { position: fixed; inset: 0; pointer-events: none; z-index: 1; opacity: 0.025; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+@keyframes drift {
+    from { transform: translate(0,0) scale(1); }
+    to   { transform: translate(25px,-18px) scale(1.04); }
+}
+
+/* ── PAGE ── */
+.page-wrap {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+    opacity: 0;
+    transform: translateY(28px);
+    animation: reveal 0.9s cubic-bezier(0.16,1,0.3,1) 0.05s forwards;
+}
+
+@keyframes reveal {
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* back link */
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-decoration: none;
+    margin-bottom: 28px;
+    transition: color 0.3s;
+}
+.back-link:hover { color: var(--gold); }
+.back-link i { font-size: 10px; }
+
+/* ── CARD ── */
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+    position: relative;
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+/* card header */
+.card-header {
+    padding: 44px 52px 36px;
+    border-bottom: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.card-header::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(201,169,110,0.02) 60px, rgba(201,169,110,0.02) 61px),
+        repeating-linear-gradient(0deg, transparent, transparent 60px, rgba(201,169,110,0.02) 60px, rgba(201,169,110,0.02) 61px);
+    pointer-events: none;
+}
+
+.header-text { position: relative; z-index: 1; }
+
+.header-eyebrow {
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.header-eyebrow::before { content: ''; display: inline-block; width: 20px; height: 1px; background: var(--gold); }
+
+#title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 34px;
+    font-weight: 300;
+    color: var(--text);
+    letter-spacing: 0.03em;
+    line-height: 1.1;
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    font-size: 11px;
+    font-weight: 300;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+}
+
+.header-icon-wrap {
+    width: 56px;
+    height: 56px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+}
+.header-icon-wrap::after { content: ''; position: absolute; bottom: -3px; right: -3px; width: 6px; height: 6px; background: var(--gold); }
+.header-icon-wrap i { color: var(--gold); font-size: 18px; }
+
+/* ── FORM BODY ── */
+.form-body {
+    padding: 44px 52px 52px;
+}
+
+/* section title */
+.form-section-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    margin-top: 36px;
+}
+.form-section-label:first-child { margin-top: 0; }
+.fsl-line { flex: 1; height: 1px; background: var(--border-subtle); }
+.fsl-text { font-size: 8px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-muted); white-space: nowrap; }
+.fsl-dot { width: 3px; height: 3px; background: var(--gold); border-radius: 50%; flex-shrink: 0; }
+
+/* field groups */
+.form-group { margin-bottom: 20px; }
+
+.two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 0;
+}
+.two-col .form-group { margin-bottom: 0; }
+
+/* two-col wrapper as form-group equiv */
+.col-wrap { margin-bottom: 20px; }
+
+/* label */
+.label {
+    display: block;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    transition: color 0.3s;
+}
+
+/* inputs */
+input, select, textarea {
+    width: 100%;
+    padding: 13px 16px;
+    background: var(--surface2);
+    border: 1px solid rgba(201,169,110,0.12);
+    border-radius: 2px;
+    font-size: 13px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 300;
+    color: var(--text);
+    letter-spacing: 0.04em;
+    transition: all 0.3s ease;
+    caret-color: var(--gold);
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--gold);
+    background: rgba(201,169,110,0.04);
+    box-shadow: 0 0 0 1px rgba(201,169,110,0.1);
+}
+
+input::placeholder, textarea::placeholder { color: rgba(138,130,120,0.5); }
+
+textarea {
+    resize: vertical;
+    min-height: 110px;
+    line-height: 1.7;
+}
+
+select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c9a96e' stroke-width='1.5'%3E%3Cpolyline points='6,9 12,15 18,9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 16px;
+    padding-right: 42px;
+    cursor: pointer;
+}
+
+select option { background: var(--surface2); color: var(--text); }
+
+/* date input styling — match the dark theme */
+input[type="date"] {
+    color-scheme: dark;
+    /* custom calendar icon in gold */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c9a96e' stroke-width='1.5'%3E%3Crect x='3' y='4' width='18' height='18' rx='2'/%3E%3Cline x1='16' y1='2' x2='16' y2='6'/%3E%3Cline x1='8' y1='2' x2='8' y2='6'/%3E%3Cline x1='3' y1='10' x2='21' y2='10'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 16px;
+    padding-right: 42px;
+    cursor: pointer;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    position: absolute;
+    right: 0;
+    width: 44px;
+    height: 100%;
+    cursor: pointer;
+}
+
+/* stipend toggle */
+.stipend-field {
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 0.4s cubic-bezier(0.16,1,0.3,1), opacity 0.3s ease, margin 0.3s;
+    margin-bottom: 0;
+}
+.stipend-field.show {
+    max-height: 100px;
+    opacity: 1;
+    margin-bottom: 20px;
+}
+
+/* submit */
+.btn-primary {
+    width: 100%;
+    padding: 16px 24px;
+    background: transparent;
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    border-radius: 2px;
+    font-size: 10px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+    margin-top: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gold);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+.btn-primary:hover { color: var(--obsidian); }
+.btn-primary:hover::before { transform: scaleX(1); }
+.btn-primary span, .btn-primary i { position: relative; z-index: 1; }
+
+.loading { pointer-events: none; opacity: 0.65; }
+
+/* divider */
+.form-divider {
+    height: 1px;
+    background: var(--border-subtle);
+    margin: 32px 0;
+}
+
+@media (max-width: 640px) {
+    body { padding: 24px 16px 48px; }
+    .card-header { padding: 32px 28px 28px; }
+    .form-body { padding: 32px 28px 40px; }
+    .two-col { grid-template-columns: 1fr; gap: 0; }
+    .two-col .form-group { margin-bottom: 20px; }
+    #title { font-size: 28px; }
+    .header-icon-wrap { display: none; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="bg-ambient">
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+</div>
+<div class="bg-grain"></div>
+
+<div class="page-wrap">
+
+    <a href="company-home.html" class="back-link">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+
+    <div class="card">
+
+        <!-- Header -->
+        <div class="card-header">
+            <div class="header-text">
+                <div class="header-eyebrow">Opportunity Listing</div>
+                <h2 id="title">Post Internship</h2>
+                <p class="subtitle">Fill in the details to create a new internship listing</p>
+            </div>
+            <div class="header-icon-wrap">
+                <i class="fas fa-satellite-dish"></i>
+            </div>
+        </div>
+
+        <!-- Form -->
+        <div class="form-body">
+            <form id="internshipForm">
+
+                <!-- Company & Role -->
+                <div class="form-section-label">
+                    <div class="fsl-dot"></div>
+                    <div class="fsl-text">Basic Information</div>
+                    <div class="fsl-line"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="label">Company Name</label>
+                    <input id="companyName" placeholder="Enter company name" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="label">Role Title</label>
+                    <input id="role" placeholder="e.g., Java Backend Intern" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="label">Internship Description</label>
+                    <textarea id="description" placeholder="Describe the internship responsibilities and expectations..." required></textarea>
+                </div>
+
+                <!-- Details -->
+                <div class="form-section-label">
+                    <div class="fsl-dot"></div>
+                    <div class="fsl-text">Role Details</div>
+                    <div class="fsl-line"></div>
+                </div>
+
+                <div class="col-wrap">
+                    <div class="two-col">
+                        <div class="form-group">
+                            <label class="label">Required Skills</label>
+                            <input id="skills" placeholder="e.g., Java, SQL, Spring Boot" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="label">Minimum CGPA</label>
+                            <input type="number" id="cgpa" step="0.01" placeholder="e.g., 7.5" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-wrap">
+                    <div class="two-col">
+                        <div class="form-group">
+                            <label class="label">Duration</label>
+                            <input id="duration" placeholder="e.g., 3 Months" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="label">Location</label>
+                            <input id="location" placeholder="e.g., Bangalore" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-wrap">
+                    <div class="two-col">
+                        <div class="form-group">
+                            <label class="label">Role Type</label>
+                            <select id="roleType" required>
+                                <option value="">Select Role Type</option>
+                                <option value="ML">Machine Learning</option>
+                                <option value="Web">Web Development</option>
+                                <option value="Backend">Backend</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="label">Work Mode</label>
+                            <select id="mode" required>
+                                <option value="">Select Mode</option>
+                                <option value="Online">Online</option>
+                                <option value="Offline">Offline</option>
+                                <option value="Hybrid">Hybrid</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stipend -->
+                <div class="form-section-label">
+                    <div class="fsl-dot"></div>
+                    <div class="fsl-text">Compensation</div>
+                    <div class="fsl-line"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="label">Stipend Provided</label>
+                    <select id="stipendProvided" onchange="toggleStipend()" required>
+                        <option value="">Select Option</option>
+                        <option value="true">Yes</option>
+                        <option value="false">No</option>
+                    </select>
+                </div>
+
+                <div class="stipend-field form-group" id="stipendField">
+                    <label class="label">Stipend Amount</label>
+                    <input id="stipend" placeholder="e.g., ₹20,000 per month">
+                </div>
+
+                <!-- Selection -->
+                <div class="form-section-label">
+                    <div class="fsl-dot"></div>
+                    <div class="fsl-text">Selection Process</div>
+                    <div class="fsl-line"></div>
+                </div>
+
+                <div class="col-wrap">
+                    <div class="two-col">
+                        <div class="form-group">
+                            <label class="label">Total Selection Rounds</label>
+                            <input type="number" id="rounds" placeholder="e.g., 3" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="label">Apply Link</label>
+                            <input id="applyLink" placeholder="https://apply.company.com" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="label">Round-Wise Process</label>
+                    <textarea id="process" placeholder="Describe the selection process round-wise..." required></textarea>
+                </div>
+
+                <!-- Application Deadline -->
+                <div class="form-section-label">
+                    <div class="fsl-dot"></div>
+                    <div class="fsl-text">Application Deadline</div>
+                    <div class="fsl-line"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="label">Application Deadline</label>
+                    <input type="date" id="applicationDeadline" required>
+                </div>
+
+                <button type="button" class="btn-primary" onclick="submitForm()">
+                    <i class="fas fa-paper-plane"></i>
+                    <span id="btnText">Save Internship</span>
+                </button>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+const email = localStorage.getItem("companyEmail");
+if (!email) {
+    window.location.href = "company-login.html";
+}
+
+const params = new URLSearchParams(window.location.search);
+const editId = params.get("id");
+
+function toggleStipend() {
+    const stipendField = document.getElementById('stipendField');
+    const stipendInput = document.getElementById('stipend');
+
+    if (stipendProvided.value === "true") {
+        stipendField.classList.add('show');
+        stipendInput.required = true;
+    } else {
+        stipendField.classList.remove('show');
+        stipendInput.required = false;
+    }
+}
+
+// EDIT MODE
+if (editId) {
+    document.getElementById("title").innerText = "Edit Internship";
+    document.querySelector('.subtitle').innerText = "Update the internship details below";
+    document.querySelector('.header-eyebrow').innerText = "Edit Listing";
+
+    fetch(`http://localhost:8080/api/internships/${editId}`)
+    .then(res => res.json())
+    .then(i => {
+        companyName.value = i.companyName;
+        role.value = i.role;
+        description.value = i.internshipDescription;
+        skills.value = i.requiredSkills;
+        cgpa.value = i.cgpa;
+        duration.value = i.duration;
+        location.value = i.location;
+        roleType.value = i.roleType;
+        mode.value = i.internshipMode;
+        stipendProvided.value = i.stipendProvided;
+        stipend.value = i.stipend;
+        rounds.value = i.totalRounds;
+        process.value = i.selectionProcess;
+        applyLink.value = i.applyLink;
+        applicationDeadline.value = i.applicationDeadline ?? '';
+        toggleStipend();
+    })
+    .catch(err => console.error('Error loading data:', err));
+}
+
+function submitForm() {
+    const btn = document.querySelector('.btn-primary');
+    const btnText = document.getElementById('btnText');
+
+    btn.classList.add('loading');
+    btnText.textContent = 'Saving...';
+
+    const url = editId
+        ? `http://localhost:8080/api/internships/update/${editId}`
+        : `http://localhost:8080/api/internships/post`;
+
+    const method = editId ? "PUT" : "POST";
+
+    fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            companyEmail: email,
+            companyName: companyName.value,
+            role: role.value,
+            internshipDescription: description.value,
+            requiredSkills: skills.value,
+            cgpa: cgpa.value,
+            duration: duration.value,
+            location: location.value,
+            roleType: roleType.value,
+            internshipMode: mode.value,
+            stipendProvided: stipendProvided.value === "true",
+            stipend: stipendProvided.value === "true" ? stipend.value : "No stipend",
+            totalRounds: rounds.value,
+            selectionProcess: process.value,
+            applyLink: applyLink.value,
+            applicationDeadline: applicationDeadline.value || null
+        })
+    })
+    .then(res => res.text())
+    .then(() => {
+        window.location.href = "edit-internship.html";
+    })
+    .catch(err => {
+        console.error('Error:', err);
+        btn.classList.remove('loading');
+        btnText.textContent = 'Save Internship';
+        alert('Error saving internship. Please try again.');
+    });
+}
+</script>
+
+</body>
+</html>

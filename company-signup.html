@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Company Signup - Create Account</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --gold: #c9a96e;
+            --gold-light: #e8d5b0;
+            --gold-dark: #9a7a45;
+            --obsidian: #0a0a0f;
+            --deep: #10101a;
+            --surface: #14141f;
+            --surface2: #1c1c2e;
+            --text: #f0ece3;
+            --text-muted: #8a8278;
+            --border: rgba(201,169,110,0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--obsidian);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        /* Ambient background */
+        .bg-ambient {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bg-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.12;
+            animation: drift 12s ease-in-out infinite alternate;
+        }
+
+        .bg-orb-1 {
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, #c9a96e, transparent);
+            top: -20%;
+            right: -10%;
+            animation-delay: 0s;
+        }
+
+        .bg-orb-2 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, #6e4fc9, transparent);
+            bottom: -10%;
+            left: -5%;
+            animation-delay: -4s;
+        }
+
+        .bg-orb-3 {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, #c9a96e, transparent);
+            top: 40%;
+            left: 20%;
+            animation-delay: -8s;
+            opacity: 0.06;
+        }
+
+        @keyframes drift {
+            from { transform: translate(0, 0) scale(1); }
+            to { transform: translate(30px, -20px) scale(1.05); }
+        }
+
+        /* Fine grain overlay */
+        .bg-grain {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+        }
+
+        /* Main container */
+        .wrapper {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: stretch;
+            width: 100%;
+            max-width: 900px;
+            min-height: 580px;
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px var(--border);
+            animation: reveal 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        @keyframes reveal {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Left panel — decorative */
+        .panel-left {
+            width: 42%;
+            background: var(--surface);
+            padding: 60px 48px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            border-right: 1px solid var(--border);
+        }
+
+        .panel-left::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: 
+                linear-gradient(135deg, rgba(201,169,110,0.05) 0%, transparent 60%),
+                repeating-linear-gradient(
+                    45deg,
+                    transparent,
+                    transparent 40px,
+                    rgba(201,169,110,0.02) 40px,
+                    rgba(201,169,110,0.02) 41px
+                );
+        }
+
+        .brand {
+            position: relative;
+        }
+
+        .brand-mark {
+            width: 48px;
+            height: 48px;
+            border: 1px solid var(--gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 32px;
+            position: relative;
+        }
+
+        .brand-mark::before, .brand-mark::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: var(--gold);
+        }
+
+        .brand-mark::before { top: -3px; left: -3px; }
+        .brand-mark::after { bottom: -3px; right: -3px; }
+
+        .brand-mark svg {
+            width: 22px;
+            height: 22px;
+            fill: none;
+            stroke: var(--gold);
+            stroke-width: 1.5;
+        }
+
+        .brand-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 28px;
+            font-weight: 300;
+            color: var(--text);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            line-height: 1.1;
+            margin-bottom: 6px;
+        }
+
+        .brand-tagline {
+            font-size: 10px;
+            font-weight: 400;
+            color: var(--text-muted);
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+        }
+
+        .panel-desc {
+            position: relative;
+        }
+
+        .panel-desc-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 20px;
+            font-weight: 300;
+            color: var(--text);
+            line-height: 1.6;
+            opacity: 0.8;
+            margin-bottom: 32px;
+        }
+
+        .divider {
+            width: 40px;
+            height: 1px;
+            background: var(--gold);
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .divider::after {
+            content: '';
+            position: absolute;
+            right: -8px;
+            top: -2px;
+            width: 5px;
+            height: 5px;
+            background: var(--gold);
+            border-radius: 50%;
+        }
+
+        .features {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 11px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .feature-dot {
+            width: 4px;
+            height: 4px;
+            background: var(--gold);
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .panel-footer {
+            position: relative;
+            font-size: 10px;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        /* Right panel — form */
+        .panel-right {
+            flex: 1;
+            background: var(--deep);
+            padding: 60px 52px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .form-heading {
+            margin-bottom: 40px;
+        }
+
+        .form-eyebrow {
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 10px;
+        }
+
+        .form-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 34px;
+            font-weight: 300;
+            color: var(--text);
+            line-height: 1.15;
+            letter-spacing: 0.02em;
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+            position: relative;
+        }
+
+        .field-label {
+            display: block;
+            font-size: 9px;
+            font-weight: 500;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            transition: color 0.3s;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 18px 14px 46px;
+            background: var(--surface2);
+            border: 1px solid rgba(201,169,110,0.15);
+            border-radius: 2px;
+            font-size: 14px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 300;
+            color: var(--text);
+            letter-spacing: 0.04em;
+            transition: all 0.3s ease;
+            caret-color: var(--gold);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--gold);
+            background: rgba(201,169,110,0.04);
+            box-shadow: 0 0 0 1px rgba(201,169,110,0.1), 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        input:focus ~ .field-label,
+        input:not(:placeholder-shown) ~ .field-label {
+            color: var(--gold);
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 15px;
+            opacity: 0.5;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        input:focus + .input-icon {
+            opacity: 1;
+        }
+
+        input::placeholder {
+            color: transparent;
+        }
+
+        /* Password strength */
+        .password-strength {
+            height: 2px;
+            margin-top: 8px;
+            background: rgba(201,169,110,0.1);
+            border-radius: 1px;
+            overflow: hidden;
+        }
+
+        .strength-bar {
+            height: 100%;
+            width: 0%;
+            border-radius: 1px;
+            transition: all 0.4s ease;
+        }
+
+        .strength-weak   .strength-bar { width: 33%; background: #ef4444; }
+        .strength-medium .strength-bar { width: 66%; background: #f59e0b; }
+        .strength-strong .strength-bar { width: 100%; background: #10b981; }
+
+        /* Submit button */
+        .signup-btn {
+            width: 100%;
+            padding: 16px;
+            background: transparent;
+            color: var(--gold);
+            border: 1px solid var(--gold);
+            border-radius: 2px;
+            font-size: 11px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .signup-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--gold);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .signup-btn:hover {
+            color: var(--obsidian);
+        }
+
+        .signup-btn:hover::before {
+            transform: scaleX(1);
+        }
+
+        .signup-btn span {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Message */
+        #msg {
+            text-align: center;
+            padding: 10px 14px;
+            border-radius: 2px;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            margin-bottom: 20px;
+            min-height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .success {
+            background: rgba(16, 185, 129, 0.08);
+            color: #6ee7b7;
+            border: 1px solid rgba(16, 185, 129, 0.25);
+        }
+
+        .error {
+            background: rgba(239, 68, 68, 0.08);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.25);
+        }
+
+        /* Login link */
+        .login-section {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(201,169,110,0.1);
+        }
+
+        .login-text {
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .login-link {
+            color: var(--gold);
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            position: relative;
+        }
+
+        .login-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--gold);
+            transition: width 0.3s ease;
+        }
+
+        .login-link:hover::after {
+            width: 100%;
+        }
+
+        /* Loading */
+        .loading { pointer-events: none; opacity: 0.7; }
+
+        /* Responsive */
+        @media (max-width: 700px) {
+            .panel-left { display: none; }
+            .wrapper { max-width: 440px; }
+            .panel-right { padding: 40px 32px; }
+        }
+
+        @media (max-width: 480px) {
+            .panel-right { padding: 36px 24px; }
+            .form-title { font-size: 28px; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-ambient">
+        <div class="bg-orb bg-orb-1"></div>
+        <div class="bg-orb bg-orb-2"></div>
+        <div class="bg-orb bg-orb-3"></div>
+    </div>
+    <div class="bg-grain"></div>
+
+    <div class="wrapper">
+        <!-- Left Decorative Panel -->
+        <div class="panel-left">
+            <div class="brand">
+                <div class="brand-mark">
+                    <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                </div>
+                <div class="brand-name">Portal<br>Suite</div>
+                <div class="brand-tagline">Enterprise Platform</div>
+            </div>
+
+            <div class="panel-desc">
+                <div class="divider"></div>
+                <p class="panel-desc-text">Elevate your enterprise operations with a platform built for precision.</p>
+                <div class="features">
+                    <div class="feature-item"><div class="feature-dot"></div>Unified Company Dashboard</div>
+                    <div class="feature-item"><div class="feature-dot"></div>Role-Based Access Control</div>
+                    <div class="feature-item"><div class="feature-dot"></div>Enterprise-Grade Security</div>
+                    <div class="feature-item"><div class="feature-dot"></div>Real-Time Analytics</div>
+                </div>
+            </div>
+
+            <div class="panel-footer">© 2025 Portal Suite</div>
+        </div>
+
+        <!-- Right Form Panel -->
+        <div class="panel-right">
+            <div class="form-heading">
+                <div class="form-eyebrow">New Account</div>
+                <div class="form-title">Create your<br>company portal</div>
+            </div>
+
+            <div class="form-group">
+                <div class="input-wrapper">
+                    <input id="name" placeholder="Company Name" required>
+                    <span class="input-icon">🏢</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="input-wrapper">
+                    <input id="email" type="email" placeholder="Company Email" required>
+                    <span class="input-icon">📧</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="input-wrapper">
+                    <input id="password" type="password" placeholder="Create Password" required>
+                    <span class="input-icon">🔒</span>
+                </div>
+                <div class="password-strength" id="passwordStrength">
+                    <div class="strength-bar" id="strengthBar"></div>
+                </div>
+            </div>
+
+            <button id="signupBtn" class="signup-btn" onclick="signup()">
+                <span>Create Account</span>
+            </button>
+
+            <div id="msg"></div>
+
+            <div class="login-section">
+                <p class="login-text">Already have an account?</p>
+                <a href="company-login.html" class="login-link">Sign in here</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const nameInput = document.getElementById('name');
+        const email = document.getElementById('email');
+        const password = document.getElementById('password');
+        const signupBtn = document.getElementById('signupBtn');
+        const msg = document.getElementById('msg');
+        const passwordStrength = document.getElementById('passwordStrength');
+        const strengthBar = document.getElementById('strengthBar');
+
+        // Password strength checker
+        password.addEventListener('input', function() {
+            const val = this.value;
+            let strength = 0;
+            
+            if (val.length >= 8) strength++;
+            if (/[A-Z]/.test(val)) strength++;
+            if (/[0-9]/.test(val)) strength++;
+            if (/[^A-Za-z0-9]/.test(val)) strength++;
+            
+            passwordStrength.className = 'password-strength';
+            
+            if (val.length === 0) {
+                strengthBar.style.width = '0';
+            } else if (strength <= 1) {
+                passwordStrength.classList.add('strength-weak');
+            } else if (strength <= 3) {
+                passwordStrength.classList.add('strength-medium');
+            } else {
+                passwordStrength.classList.add('strength-strong');
+            }
+        });
+
+        function signup() {
+            // Enhanced validation
+            if (!nameInput.value.trim()) {
+                showMessage('Please enter your company name', 'error');
+                nameInput.focus();
+                return;
+            }
+
+            if (!email.value || !email.value.includes('@')) {
+                showMessage('Please enter a valid email address', 'error');
+                email.focus();
+                return;
+            }
+
+            if (!password.value || password.value.length < 6) {
+                showMessage('Password must be at least 6 characters', 'error');
+                password.focus();
+                return;
+            }
+
+            // Show loading state
+            signupBtn.classList.add('loading');
+            signupBtn.querySelector('span').textContent = 'Creating Account...';
+            msg.textContent = '';
+            msg.className = '';
+
+            fetch("http://localhost:8080/api/company/signup", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    companyName: nameInput.value.trim(),
+                    email: email.value.trim(),
+                    password: password.value
+                })
+            })
+            .then(res => res.text())
+            .then(data => {
+                signupBtn.classList.remove('loading');
+                signupBtn.querySelector('span').textContent = 'Create Account';
+                
+                const isSuccess = data.includes("successful") || data.includes("success");
+                showMessage(data, isSuccess ? 'success' : 'error');
+                
+                if (isSuccess) {
+                    setTimeout(() => {
+                        window.location.href = "company-login.html";
+                    }, 1500);
+                }
+            })
+            .catch(error => {
+                signupBtn.classList.remove('loading');
+                signupBtn.querySelector('span').textContent = 'Create Account';
+                showMessage('Network error. Please try again.', 'error');
+                console.error('Signup error:', error);
+            });
+        }
+
+        function showMessage(text, type) {
+            msg.textContent = text;
+            msg.className = type;
+        }
+
+        // Allow Enter key to signup
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && document.activeElement !== password) {
+                signup();
+            }
+        });
+
+        // Auto-focus first input
+        nameInput.focus();
+    </script>
+</body>
+</html>
