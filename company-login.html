@@ -30,7 +30,7 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
-            overflow: hidden;
+            overflow: auto; /* allow scrolling */
         }
 
         /* Ambient orbs */
@@ -84,7 +84,6 @@
             overflow: hidden;
         }
 
-        /* subtle grid lines */
         .panel-left::before {
             content: '';
             position: absolute;
@@ -95,7 +94,6 @@
                 repeating-linear-gradient(90deg, transparent, transparent 48px, rgba(201,169,110,0.025) 48px, rgba(201,169,110,0.025) 49px);
         }
 
-        /* AI circuit decoration */
         .ai-deco {
             position: absolute;
             bottom: 120px;
@@ -409,10 +407,11 @@
             .panel-right { padding: 36px 22px; }
             .form-title { font-size: 30px; }
         }
+
     </style>
 </head>
-
 <body>
+
     <div class="bg-ambient">
         <div class="bg-orb bg-orb-1"></div>
         <div class="bg-orb bg-orb-2"></div>
