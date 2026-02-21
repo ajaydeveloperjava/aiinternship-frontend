@@ -545,6 +545,9 @@ input:not(:placeholder-shown) ~ .fill-dot { background: var(--gold); }
 </div>
 
 <script>
+/* ── Backend Base URL ── */
+const BASE_URL = "https://aiinternship-backend-5.onrender.com";
+
 /* ── Particles ── */
 const particleContainer = document.getElementById('particles');
 for (let i = 0; i < 22; i++) {
@@ -555,39 +558,47 @@ for (let i = 0; i < 22; i++) {
     p.style.animationDuration = (8 + Math.random() * 14) + 's';
     p.style.animationDelay = (Math.random() * 12) + 's';
     p.style.width = p.style.height = (Math.random() > 0.6 ? 3 : 2) + 'px';
-    p.style.opacity = 0;
     particleContainer.appendChild(p);
 }
 
-/* ── Auth & prefill ── */
+/* ── Auth & Prefill ── */
 const email = localStorage.getItem("userEmail");
 let isUpdate = false;
 
-if (!email) window.location.href = "student-login.html";
+if (!email) {
+    window.location.href = "student-login.html";
+}
 
-fetch(`http://localhost:8080/api/students/profile?email=${email}`)
-.then(res => res.json())
+/* Fetch existing profile */
+fetch(`${BASE_URL}/api/students/profile?email=${email}`)
+.then(res => {
+    if (!res.ok) return null;
+    return res.json();
+})
 .then(data => {
     if (data && data.profileCompleted) {
         isUpdate = true;
+
         document.getElementById("eyebrow").textContent = "Update Profile";
         document.getElementById("title").innerHTML = 'Update your<br><em>profile</em>';
         document.getElementById("subtitle").textContent = "Edit your professional details below";
         document.getElementById("btnLabel").textContent = "Save Changes";
 
-        document.getElementById("collegeName").value      = data.collegeName      || "";
-        document.getElementById("degree").value           = data.degree           || "";
-        document.getElementById("department").value       = data.department       || "";
-        document.getElementById("yearOfStudy").value      = data.yearOfStudy      || "";
-        document.getElementById("cgpa").value             = data.cgpa             || "";
-        document.getElementById("skills").value           = data.skills           || "";
-        document.getElementById("preferredLocation").value= data.preferredLocation|| "";
-        document.getElementById("resumeFileName").value   = data.resumeFileName   || "";
+        document.getElementById("collegeName").value       = data.collegeName       || "";
+        document.getElementById("degree").value            = data.degree            || "";
+        document.getElementById("department").value        = data.department        || "";
+        document.getElementById("yearOfStudy").value       = data.yearOfStudy       || "";
+        document.getElementById("cgpa").value              = data.cgpa              || "";
+        document.getElementById("skills").value            = data.skills            || "";
+        document.getElementById("preferredLocation").value = data.preferredLocation || "";
+        document.getElementById("resumeFileName").value    = data.resumeFileName    || "";
     }
 })
-.catch(() => {});
+.catch(err => {
+    console.log("Profile fetch failed:", err);
+});
 
-/* ── Form submit ── */
+/* ── Form Submit ── */
 document.getElementById("profileForm").addEventListener("submit", function(e) {
     e.preventDefault();
 
@@ -600,7 +611,7 @@ document.getElementById("profileForm").addEventListener("submit", function(e) {
     card.classList.add("is-loading");
 
     const profileData = {
-        email,
+        email: email,
         collegeName:       document.getElementById("collegeName").value,
         degree:            document.getElementById("degree").value,
         department:        document.getElementById("department").value,
@@ -612,8 +623,8 @@ document.getElementById("profileForm").addEventListener("submit", function(e) {
     };
 
     const url = isUpdate
-        ? "http://localhost:8080/api/students/updateProfile"
-        : "http://localhost:8080/api/students/createProfile";
+        ? `${BASE_URL}/api/students/updateProfile`
+        : `${BASE_URL}/api/students/createProfile`;
 
     fetch(url, {
         method: "POST",
@@ -625,7 +636,8 @@ document.getElementById("profileForm").addEventListener("submit", function(e) {
         alert(data);
         window.location.href = "student-home.html";
     })
-    .catch(() => {
+    .catch(err => {
+        console.error("Profile submit failed:", err);
         alert("Something went wrong. Please try again.");
         btn.classList.remove("loading");
         label.textContent = isUpdate ? "Save Changes" : "Submit Profile";

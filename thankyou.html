@@ -397,17 +397,43 @@ body {
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <script>
+
+const FRONTEND_BASE = "https://ajaydeveloperjava.github.io/aiinternship-frontend";
+
 function showSummary() {
-    const domains  = localStorage.getItem("domains");
-    const type     = localStorage.getItem("internshipType");
-    const stipend  = localStorage.getItem("expectedStipend");
 
-    document.getElementById('domainsSummary').textContent  = domains  || 'Not set';
-    document.getElementById('typeSummary').textContent     = type     || 'Not set';
-    document.getElementById('stipendSummary').textContent  = stipend  || 'Not set';
+    const domainsRaw = localStorage.getItem("domains");
+    const type       = localStorage.getItem("internshipType");
+    const stipend    = localStorage.getItem("expectedStipend");
+
+    // Safely parse domains (because you stored as JSON array)
+    let formattedDomains = "Not set";
+    if (domainsRaw) {
+        try {
+            const arr = JSON.parse(domainsRaw);
+            formattedDomains = arr.join(", ");
+        } catch (e) {
+            formattedDomains = domainsRaw;
+        }
+    }
+
+    document.getElementById("domainsSummary").textContent  = formattedDomains;
+    document.getElementById("typeSummary").textContent     = type    || "Not set";
+    document.getElementById("stipendSummary").textContent  = stipend || "Not set";
 }
-showSummary();
-</script>
 
+/* Fix CTA navigation for GitHub Pages */
+function fixNavigation() {
+    const profileBtn = document.querySelector(".cta-btn");
+    profileBtn.addEventListener("click", function(e) {
+        e.preventDefault();
+        window.location.href = `${FRONTEND_BASE}/create-profile.html`;
+    });
+}
+
+showSummary();
+fixNavigation();
+
+</script>
 </body>
 </html>

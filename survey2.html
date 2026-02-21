@@ -371,15 +371,36 @@ select option {
 </div>
 
 <script>
+
+/* ───────── CONFIG ───────── */
+const FRONTEND_BASE = "https://ajaydeveloperjava.github.io/aiinternship-frontend";
+const BACKEND_BASE  = "https://aiinternship-backend-5.onrender.com";
+
+/* ───────── BACK BUTTON ───────── */
 function goBack() {
     document.body.style.opacity = '0';
     document.body.style.transform = 'scale(0.97)';
-    setTimeout(() => window.location.href = "survey1.html", 320);
+    setTimeout(() => {
+        window.location.href = `${FRONTEND_BASE}/survey1.html`;
+    }, 320);
 }
 
+/* ───────── SUBMIT SURVEY ───────── */
 function submitSurvey() {
+
     const email = localStorage.getItem("userEmail");
-    const domains = localStorage.getItem("domains");
+    const domainsRaw = localStorage.getItem("domains");
+
+    if (!email || !domainsRaw) {
+        alert("Session expired. Please start again.");
+        window.location.href = `${FRONTEND_BASE}/survey1.html`;
+        return;
+    }
+
+    // Parse domains safely
+    const domainsArray = JSON.parse(domainsRaw);
+    const domains = domainsArray.join(",");
+
     const internshipType = document.getElementById("internshipType").value;
     const expectedStipend = document.getElementById("expectedStipend").value;
 
@@ -387,16 +408,33 @@ function submitSurvey() {
     finishBtn.querySelector('span').textContent = 'Submitting…';
     finishBtn.disabled = true;
 
-    fetch(`http://localhost:8080/api/students/submitSurvey?email=${email}&domains=${domains}&internshipType=${internshipType}&expectedStipend=${expectedStipend}`, {
-        method: "POST"
+    fetch(
+        `${BACKEND_BASE}/api/students/submitSurvey?` +
+        `email=${encodeURIComponent(email)}` +
+        `&domains=${encodeURIComponent(domains)}` +
+        `&internshipType=${encodeURIComponent(internshipType)}` +
+        `&expectedStipend=${encodeURIComponent(expectedStipend)}`,
+        {
+            method: "POST"
+        }
+    )
+    .then(res => {
+        if (!res.ok) throw new Error("Server error");
+        return res.text();
     })
-    .then(res => res.text())
     .then(data => {
+
+        // Save preferences locally
         localStorage.setItem("internshipType", internshipType);
         localStorage.setItem("expectedStipend", expectedStipend);
+
+        // Smooth transition
         document.body.style.opacity = '0';
         document.body.style.transform = 'scale(0.97)';
-        setTimeout(() => window.location.href = "thankyou.html", 400);
+
+        setTimeout(() => {
+            window.location.href = `${FRONTEND_BASE}/thankyou.html`;
+        }, 400);
     })
     .catch(err => {
         alert("Submission failed. Please try again.");
@@ -404,6 +442,7 @@ function submitSurvey() {
         finishBtn.disabled = false;
     });
 }
+
 </script>
 
 </body>

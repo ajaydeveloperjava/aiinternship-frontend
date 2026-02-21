@@ -525,65 +525,66 @@
     </div>
 
     <script>
-        const email = document.getElementById('email');
-        const password = document.getElementById('password');
-        const loginBtn = document.getElementById('loginBtn');
-        const msg = document.getElementById('msg');
+    const email = document.getElementById('email');
+    const password = document.getElementById('password');
+    const loginBtn = document.getElementById('loginBtn');
+    const msg = document.getElementById('msg');
 
-        function login() {
-            // Basic validation
-            if (!email.value || !password.value) {
-                showMessage('Please fill in all fields', 'error');
-                return;
-            }
+    const BASE_URL = "https://aiinternship-backend-5.onrender.com";
 
-            if (!email.value.includes('@')) {
-                showMessage('Please enter a valid email address', 'error');
-                return;
-            }
+    function login() {
 
-            // Show loading state
-            loginBtn.classList.add('loading');
-            loginBtn.querySelector('span').textContent = 'Signing In...';
-            msg.textContent = '';
-            msg.className = '';
-
-            fetch(`http://localhost:8080/api/company/login?email=${encodeURIComponent(email.value)}&password=${encodeURIComponent(password.value)}`, {
-                method: "POST"
-            })
-            .then(res => res.text())
-            .then(data => {
-                loginBtn.classList.remove('loading');
-                loginBtn.querySelector('span').textContent = 'Sign In';
-
-                showMessage(data, data === "Login successful" ? 'success' : 'error');
-
-                if (data === "Login successful") {
-                    localStorage.setItem("companyEmail", email.value);
-                    setTimeout(() => {
-                        window.location.href = "company-home.html";
-                    }, 1200);
-                }
-            })
-            .catch(error => {
-                loginBtn.classList.remove('loading');
-                loginBtn.querySelector('span').textContent = 'Sign In';
-                showMessage('Network error. Please try again.', 'error');
-                console.error('Login error:', error);
-            });
+        if (!email.value || !password.value) {
+            showMessage('Please fill in all fields', 'error');
+            return;
         }
 
-        function showMessage(text, type) {
-            msg.textContent = text;
-            msg.className = type;
+        if (!email.value.includes('@')) {
+            showMessage('Please enter a valid email address', 'error');
+            return;
         }
 
-        // Allow Enter key to login
-        document.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') login();
+        loginBtn.classList.add('loading');
+        loginBtn.querySelector('span').textContent = 'Signing In...';
+        msg.textContent = '';
+        msg.className = '';
+
+        fetch(`${BASE_URL}/api/company/login?email=${encodeURIComponent(email.value)}&password=${encodeURIComponent(password.value)}`, {
+            method: "POST"
+        })
+        .then(res => res.text())
+        .then(data => {
+            loginBtn.classList.remove('loading');
+            loginBtn.querySelector('span').textContent = 'Sign In';
+
+            const isSuccess = data.toLowerCase().includes("success");
+            showMessage(data, isSuccess ? 'success' : 'error');
+
+            if (isSuccess) {
+                localStorage.setItem("companyEmail", email.value);
+                setTimeout(() => {
+                    window.location.href = "company-home.html";
+                }, 1200);
+            }
+        })
+        .catch(error => {
+            loginBtn.classList.remove('loading');
+            loginBtn.querySelector('span').textContent = 'Sign In';
+            showMessage('Network error. Please try again.', 'error');
+            console.error('Login error:', error);
         });
+    }
 
-        email.focus();
-    </script>
+    function showMessage(text, type) {
+        msg.textContent = text;
+        msg.className = type;
+    }
+
+    document.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') login();
+    });
+
+    email.focus();
+</script>
 </body>
 </html>

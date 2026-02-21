@@ -744,17 +744,13 @@ body {
 </footer>
 
 <script>
-/* ═══════════════════════════════
-   STATE
-═══════════════════════════════ */
+const BASE_URL = "https://aiinternship-backend-5.onrender.com";
+
 const params       = new URLSearchParams(window.location.search);
 const internshipId = params.get("internshipId");
-let   resumeId     = null;
-let   selectedFile = null;
+let resumeId = null;
+let selectedFile = null;
 
-/* ═══════════════════════════════
-   DOM REFS
-═══════════════════════════════ */
 const fileInput   = document.getElementById("resumeFile");
 const dropZone    = document.getElementById("dropZone");
 const filePreview = document.getElementById("filePreview");
@@ -767,9 +763,6 @@ const spinner     = document.getElementById("spinner");
 const statusTxt   = document.getElementById("statusTxt");
 const results     = document.getElementById("results");
 
-/* ═══════════════════════════════
-   FILE HANDLING — FIXED & WORKING
-═══════════════════════════════ */
 function formatBytes(bytes) {
   if (bytes < 1024) return bytes + ' B';
   if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
@@ -779,7 +772,6 @@ function formatBytes(bytes) {
 function setFile(file) {
   if (!file) return;
   selectedFile = file;
-
   fpName.textContent = file.name;
   fpSize.textContent = formatBytes(file.size);
   filePreview.classList.add("show");
@@ -797,27 +789,29 @@ function clearFile() {
   setStatus("", false);
 }
 
-// Input change — primary trigger
 fileInput.addEventListener("change", function () {
   if (this.files && this.files[0]) setFile(this.files[0]);
 });
 
-// Remove button
 fpRemove.addEventListener("click", function (e) {
   e.stopPropagation();
   clearFile();
 });
 
-// Drag & drop on the zone
-dropZone.addEventListener("dragenter",  e => { e.preventDefault(); dropZone.classList.add("drag-over"); });
-dropZone.addEventListener("dragover",   e => { e.preventDefault(); dropZone.classList.add("drag-over"); });
-dropZone.addEventListener("dragleave",  e => { dropZone.classList.remove("drag-over"); });
+dropZone.addEventListener("dragover", e => {
+  e.preventDefault();
+  dropZone.classList.add("drag-over");
+});
+
+dropZone.addEventListener("dragleave", () => {
+  dropZone.classList.remove("drag-over");
+});
+
 dropZone.addEventListener("drop", function (e) {
   e.preventDefault();
   dropZone.classList.remove("drag-over");
-  const file = e.dataTransfer?.files?.[0];
+  const file = e.dataTransfer.files[0];
   if (file) {
-    // Inject into input so FormData works normally
     const dt = new DataTransfer();
     dt.items.add(file);
     fileInput.files = dt.files;
@@ -825,67 +819,47 @@ dropZone.addEventListener("drop", function (e) {
   }
 });
 
-/* ═══════════════════════════════
-   STATUS HELPER
-═══════════════════════════════ */
 function setStatus(msg, loading) {
   statusTxt.textContent = msg;
   loading ? spinner.classList.add("active") : spinner.classList.remove("active");
 }
 
-/* ═══════════════════════════════
-   UPLOAD & PREDICT
-═══════════════════════════════ */
 function uploadResume() {
-  if (!selectedFile) { alert("Please select your résumé first."); return; }
+  if (!selectedFile) {
+    alert("Please select your résumé first.");
+    return;
+  }
+
+  if (!internshipId) {
+    alert("Internship ID missing in URL.");
+    return;
+  }
 
   checkBtn.disabled = true;
   btnTxt.textContent = "Uploading…";
-  setStatus("Uploading résumé to server…", true);
+  setStatus("Uploading résumé...", true);
   results.innerHTML = "";
 
   const formData = new FormData();
-  formData.append("file",  selectedFile);
+  formData.append("file", selectedFile);
   formData.append("email", "student@test.com");
-  formData.append("cgpa",  "8.0");
+  formData.append("cgpa", "8.0");
 
-  fetch("http://localhost:8080/api/resume/upload", {
+  fetch(`${BASE_URL}/api/resume/upload`, {
     method: "POST",
     body: formData
-    // ✅ Do NOT set Content-Type manually — browser sets multipart boundary automatically
   })
-  .then(r => {
-    if (!r.ok) throw new Error("Upload failed: " + r.status);
-    return r.json();
-  })
+  .then(r => r.json())
   .then(d => {
     resumeId = d.id ?? d.resumeId;
-    setStatus("Running AI compatibility analysis…", true);
     btnTxt.textContent = "Analysing…";
-    return predict();
+    setStatus("Running AI analysis...", true);
+    return fetch(
+      `${BASE_URL}/api/resume/predict?resumeId=${resumeId}&internshipId=${internshipId}`,
+      { method: "POST" }
+    );
   })
-  .catch(err => {
-    console.warn("Upload error, using demo data:", err);
-    setStatus("Using demo data (server offline)", false);
-    renderResult({
-      matchPercentage: 72,
-      matchedSkills:   ["Java", "SQL", "HTML", "REST API"],
-      missingSkills:   ["Spring Boot", "Microservices", "Docker"]
-    });
-    checkBtn.disabled = false;
-    btnTxt.textContent = "Run AI Screening";
-  });
-}
-
-function predict() {
-  return fetch(
-    `http://localhost:8080/api/resume/predict?resumeId=${resumeId}&internshipId=${internshipId}`,
-    { method: "POST" }
-  )
-  .then(r => {
-    if (!r.ok) throw new Error("Predict failed: " + r.status);
-    return r.json();
-  })
+  .then(r => r.json())
   .then(d => {
     setStatus("", false);
     checkBtn.disabled = false;
@@ -893,136 +867,47 @@ function predict() {
     renderResult(d);
   })
   .catch(err => {
-    console.warn("Predict error:", err);
-    setStatus("", false);
+    console.error(err);
+    setStatus("Something went wrong.", false);
     checkBtn.disabled = false;
     btnTxt.textContent = "Run AI Screening";
-    renderResult({
-      matchPercentage: 72,
-      matchedSkills:   ["Java", "SQL", "HTML", "REST API"],
-      missingSkills:   ["Spring Boot", "Microservices", "Docker"]
-    });
   });
 }
 
-/* ═══════════════════════════════
-   RENDER RESULTS
-═══════════════════════════════ */
 function renderResult(d) {
-  const pct     = Math.min(100, Math.max(0, d.matchPercentage ?? 0));
+  const pct = Math.min(100, Math.max(0, d.matchPercentage ?? 0));
   const matched = d.matchedSkills ?? [];
   const missing = d.missingSkills ?? [];
 
-  // Score colour & label
-  let colour, gradStop1, gradStop2, grade, desc;
+  let grade, desc, colour;
+
   if (pct >= 75) {
-    colour    = '#4ade80'; gradStop1 = '#16a34a'; gradStop2 = '#4ade80';
-    grade     = 'Strong Match';
-    desc      = 'Your profile is well-aligned with this internship. Apply with confidence — your skills directly match the requirements.';
+    grade = "Strong Match";
+    desc = "Your profile is well-aligned with this internship.";
+    colour = "#4ade80";
   } else if (pct >= 45) {
-    colour    = '#fbbf24'; gradStop1 = '#d97706'; gradStop2 = '#fbbf24';
-    grade     = 'Moderate Match';
-    desc      = 'You meet several key requirements. Strengthening the skills listed below would significantly boost your application.';
+    grade = "Moderate Match";
+    desc = "You meet several key requirements.";
+    colour = "#fbbf24";
   } else {
-    colour    = '#fb7185'; gradStop1 = '#be123c'; gradStop2 = '#fb7185';
-    grade     = 'Low Match';
-    desc      = 'Your current profile has limited overlap with this role. Consider building the missing competencies before applying.';
+    grade = "Low Match";
+    desc = "Your profile needs improvement for this role.";
+    colour = "#fb7185";
   }
 
-  const circumference = 2 * Math.PI * 54; // r=54 → 339.3
-  const offset = circumference - (pct / 100) * circumference;
-
   results.innerHTML = `
-    <!-- SCORE CARD -->
-    <div class="result-card" style="animation-delay:0s">
-      <div class="rc-header"><i class="fas fa-chart-pie"></i> Compatibility Score</div>
+    <div class="result-card">
       <div class="rc-body">
-        <div class="score-layout">
-          <div class="score-ring-wrap">
-            <svg viewBox="0 0 120 120">
-              <defs>
-                <linearGradient id="sg" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%"   stop-color="${gradStop1}"/>
-                  <stop offset="100%" stop-color="${gradStop2}"/>
-                </linearGradient>
-              </defs>
-              <circle class="sr-track" cx="60" cy="60" r="54"/>
-              <circle class="sr-fill" id="srFill" cx="60" cy="60" r="54"
-                stroke="url(#sg)" stroke-dasharray="${circumference}"/>
-            </svg>
-            <div class="score-num">
-              <div class="score-val" id="scoreVal" style="color:${colour}">0%</div>
-              <div class="score-lbl">match</div>
-            </div>
-          </div>
-
-          <div class="score-info">
-            <div class="score-grade" style="color:${colour}">${grade}</div>
-            <div class="score-desc">${desc}</div>
-            <div class="score-bar-wrap">
-              <div class="score-bar-fill" id="sBar"
-                style="background:linear-gradient(90deg,${gradStop1},${gradStop2})"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- MATCHED SKILLS -->
-    <div class="result-card" style="animation-delay:0.08s">
-      <div class="rc-header"><i class="fas fa-circle-check"></i> Matched Skills</div>
-      <div class="rc-body">
-        ${matched.length > 0
-          ? `<div class="skills-grid">
-              ${matched.map(s => `<span class="s-pill matched"><i class="fas fa-check"></i>${s}</span>`).join('')}
-            </div>`
-          : `<p style="font-size:13px;color:var(--muted)">No direct skill matches detected.</p>`
-        }
-      </div>
-    </div>
-
-    <!-- MISSING SKILLS -->
-    <div class="result-card" style="animation-delay:0.16s">
-      <div class="rc-header"><i class="fas fa-triangle-exclamation"></i> Skills to Develop</div>
-      <div class="rc-body">
-        ${missing.length > 0
-          ? `<div class="skills-grid">
-              ${missing.map(s => `<span class="s-pill missing"><i class="fas fa-arrow-up-right-dots"></i>${s}</span>`).join('')}
-            </div>`
-          : `<p style="font-size:13px;color:var(--muted)">You have all the required skills — great!</p>`
-        }
-      </div>
-    </div>
-
-    <!-- RECOMMENDATION -->
-    <div class="result-card" style="animation-delay:0.24s">
-      <div class="rc-header"><i class="fas fa-lightbulb"></i> AI Recommendation</div>
-      <div class="rc-body">
-        <div class="reco-box">
-          ${pct >= 75
-            ? `Your résumé demonstrates strong alignment with the role requirements. Focus on highlighting your matched skills prominently in your cover letter and tailor your experience to echo the internship description keywords.`
-            : pct >= 45
-            ? `You have a solid foundation. Invest time in building <strong style="color:var(--gold2)">${missing.slice(0,2).join(' and ')}</strong> to close the gap. Consider a short course or project to demonstrate practical competency before applying.`
-            : `We recommend upskilling in <strong style="color:var(--gold2)">${missing.slice(0,3).join(', ')}</strong> before applying. Look for beginner-friendly projects on GitHub or take a focused online course to build these competencies systematically.`
-          }
-        </div>
+        <h3 style="color:${colour}">${grade} — ${pct}%</h3>
+        <p>${desc}</p>
+        <br>
+        <strong>Matched Skills:</strong><br>
+        ${matched.join(", ") || "None"}<br><br>
+        <strong>Missing Skills:</strong><br>
+        ${missing.join(", ") || "None"}
       </div>
     </div>
   `;
-
-  // Animate ring
-  setTimeout(() => {
-    document.getElementById("srFill").style.strokeDashoffset = offset;
-    document.getElementById("sBar").style.width = pct + "%";
-
-    let c = 0;
-    const ticker = setInterval(() => {
-      c++;
-      const el = document.getElementById("scoreVal");
-      if (el) el.textContent = c + "%";
-      if (c >= pct) clearInterval(ticker);
-    }, 14);
-  }, 150);
 }
 </script>
 

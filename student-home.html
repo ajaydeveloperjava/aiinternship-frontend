@@ -652,43 +652,80 @@ body::after {
 </div>
 
 <script>
-/* ─── CURSOR ─── */
+/* ───────────────────────────────────────── */
+/* BACKEND BASE URL (PRODUCTION)            */
+/* ───────────────────────────────────────── */
+const BASE_URL = "https://aiinternship-backend-5.onrender.com";
+
+/* ───────────────────────────────────────── */
+/* CURSOR                                   */
+/* ───────────────────────────────────────── */
 const dot  = document.getElementById('cursorDot');
 const ring = document.getElementById('cursorRing');
 let mx=0,my=0,rx=0,ry=0;
 
 document.addEventListener('mousemove',e=>{
-  mx=e.clientX; my=e.clientY;
-  dot.style.left=mx+'px'; dot.style.top=my+'px';
+  mx=e.clientX; 
+  my=e.clientY;
+  dot.style.left=mx+'px'; 
+  dot.style.top=my+'px';
 });
 
 (function loopRing(){
-  rx+=(mx-rx)*0.11; ry+=(my-ry)*0.11;
-  ring.style.left=rx+'px'; ring.style.top=ry+'px';
+  rx+=(mx-rx)*0.11; 
+  ry+=(my-ry)*0.11;
+  ring.style.left=rx+'px'; 
+  ring.style.top=ry+'px';
   requestAnimationFrame(loopRing);
 })();
 
-document.querySelectorAll('button,a,.cta-btn,.feature-card,.how-card,.benefit-card,.stat-chip').forEach(el=>{
-  el.addEventListener('mouseenter',()=>{ ring.style.width='50px'; ring.style.height='50px'; ring.style.borderColor='rgba(201,168,76,0.6)'; });
-  el.addEventListener('mouseleave',()=>{ ring.style.width='32px'; ring.style.height='32px'; ring.style.borderColor='rgba(245,243,239,0.32)'; });
+document.querySelectorAll('button,a,.cta-btn,.feature-card,.how-card,.benefit-card,.stat-chip')
+.forEach(el=>{
+  el.addEventListener('mouseenter',()=>{
+    ring.style.width='50px';
+    ring.style.height='50px';
+    ring.style.borderColor='rgba(201,168,76,0.6)';
+  });
+  el.addEventListener('mouseleave',()=>{
+    ring.style.width='32px';
+    ring.style.height='32px';
+    ring.style.borderColor='rgba(245,243,239,0.32)';
+  });
 });
 
-/* ─── PARTICLES ─── */
+/* ───────────────────────────────────────── */
+/* PARTICLES                                */
+/* ───────────────────────────────────────── */
 const cvs=document.getElementById('particles');
 const ctx=cvs.getContext('2d');
 let W,H,pts=[];
 
-function resize(){ W=cvs.width=window.innerWidth; H=cvs.height=window.innerHeight; }
-resize(); window.addEventListener('resize',resize);
+function resize(){
+  W=cvs.width=window.innerWidth; 
+  H=cvs.height=window.innerHeight; 
+}
+resize(); 
+window.addEventListener('resize',resize);
 
 function Pt(){
-  this.x=Math.random()*W; this.y=Math.random()*H;
+  this.x=Math.random()*W; 
+  this.y=Math.random()*H;
   this.s=Math.random()*1.0+0.3;
-  this.vx=(Math.random()-.5)*0.15; this.vy=(Math.random()-.5)*0.15;
+  this.vx=(Math.random()-.5)*0.15; 
+  this.vy=(Math.random()-.5)*0.15;
   this.a=Math.random()*0.32+0.06;
-  this.col=Math.random()>.5?`rgba(201,168,76,${this.a})`:`rgba(245,243,239,${this.a})`;
+  this.col=Math.random()>.5
+      ? `rgba(201,168,76,${this.a})`
+      : `rgba(245,243,239,${this.a})`;
 }
-Pt.prototype.tick=function(){ this.x+=this.vx; this.y+=this.vy; if(this.x<0)this.x=W; if(this.x>W)this.x=0; if(this.y<0)this.y=H; if(this.y>H)this.y=0; };
+Pt.prototype.tick=function(){
+  this.x+=this.vx; 
+  this.y+=this.vy; 
+  if(this.x<0)this.x=W; 
+  if(this.x>W)this.x=0; 
+  if(this.y<0)this.y=H; 
+  if(this.y>H)this.y=0; 
+};
 
 for(let i=0;i<90;i++) pts.push(new Pt());
 
@@ -696,35 +733,61 @@ function draw(){
   ctx.clearRect(0,0,W,H);
   for(let i=0;i<pts.length;i++){
     for(let j=i+1;j<pts.length;j++){
-      const dx=pts[i].x-pts[j].x, dy=pts[i].y-pts[j].y;
+      const dx=pts[i].x-pts[j].x, 
+            dy=pts[i].y-pts[j].y;
       const d=Math.sqrt(dx*dx+dy*dy);
       if(d<105){
         ctx.beginPath();
         ctx.strokeStyle=`rgba(201,168,76,${0.048*(1-d/105)})`;
         ctx.lineWidth=0.5;
-        ctx.moveTo(pts[i].x,pts[i].y); ctx.lineTo(pts[j].x,pts[j].y);
+        ctx.moveTo(pts[i].x,pts[i].y); 
+        ctx.lineTo(pts[j].x,pts[j].y);
         ctx.stroke();
       }
     }
   }
-  pts.forEach(p=>{ p.tick(); ctx.beginPath(); ctx.arc(p.x,p.y,p.s,0,Math.PI*2); ctx.fillStyle=p.col; ctx.fill(); });
+  pts.forEach(p=>{
+    p.tick();
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.s,0,Math.PI*2);
+    ctx.fillStyle=p.col;
+    ctx.fill();
+  });
   requestAnimationFrame(draw);
 }
 draw();
 
-/* ─── LOGIC (UNTOUCHED) ─── */
+/* ───────────────────────────────────────── */
+/* STUDENT AUTH + PROFILE FETCH             */
+/* ───────────────────────────────────────── */
+
 const email = localStorage.getItem("userEmail");
 
+// If not logged in → redirect
 if(!email){
     window.location.href="student-login.html";
 }
 
-fetch(`http://localhost:8080/api/students/profile?email=${email}`)
-.then(res=>res.json())
+// Fetch profile from LIVE backend
+fetch(`${BASE_URL}/api/students/profile?email=${encodeURIComponent(email)}`)
+.then(res=>{
+    if(!res.ok){
+        throw new Error("Session invalid");
+    }
+    return res.json();
+})
 .then(data=>{
     document.getElementById("welcome").innerText =
         "Welcome back, " + (data.fullName || "Student") + " 🚀";
+})
+.catch(()=>{
+    localStorage.removeItem("userEmail");
+    window.location.href="student-login.html";
 });
+
+/* ───────────────────────────────────────── */
+/* NAVIGATION FUNCTIONS                     */
+/* ───────────────────────────────────────── */
 
 function goToProfile(){
     window.location.href="student-profile.html";
@@ -735,7 +798,7 @@ function viewInternships(){
 }
 
 function logout(){
-    localStorage.clear();
+    localStorage.removeItem("userEmail");
     window.location.href="student-login.html";
 }
 </script>

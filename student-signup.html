@@ -568,8 +568,16 @@ document.addEventListener('mousemove',e=>{
 })();
 
 document.querySelectorAll('input, button, a').forEach(el=>{
-    el.addEventListener('mouseenter',()=>{ ring.style.width='48px'; ring.style.height='48px'; ring.style.borderColor='rgba(201,168,76,0.6)'; });
-    el.addEventListener('mouseleave',()=>{ ring.style.width='32px'; ring.style.height='32px'; ring.style.borderColor='rgba(245,243,239,0.35)'; });
+    el.addEventListener('mouseenter',()=>{
+        ring.style.width='48px';
+        ring.style.height='48px';
+        ring.style.borderColor='rgba(201,168,76,0.6)';
+    });
+    el.addEventListener('mouseleave',()=>{
+        ring.style.width='32px';
+        ring.style.height='32px';
+        ring.style.borderColor='rgba(245,243,239,0.35)';
+    });
 });
 
 /* ─── PARTICLES ─── */
@@ -587,7 +595,11 @@ function Pt(){
     this.a=Math.random()*0.35+0.07;
     this.col=Math.random()>.55?`rgba(201,168,76,${this.a})`:`rgba(245,243,239,${this.a})`;
 }
-Pt.prototype.tick=function(){ this.x+=this.vx; this.y+=this.vy; if(this.x<0)this.x=W; if(this.x>W)this.x=0; if(this.y<0)this.y=H; if(this.y>H)this.y=0; };
+Pt.prototype.tick=function(){
+    this.x+=this.vx; this.y+=this.vy;
+    if(this.x<0)this.x=W; if(this.x>W)this.x=0;
+    if(this.y<0)this.y=H; if(this.y>H)this.y=0;
+};
 
 for(let i=0;i<80;i++) pts.push(new Pt());
 
@@ -601,12 +613,19 @@ function draw(){
                 ctx.beginPath();
                 ctx.strokeStyle=`rgba(201,168,76,${0.05*(1-d/100)})`;
                 ctx.lineWidth=0.5;
-                ctx.moveTo(pts[i].x,pts[i].y); ctx.lineTo(pts[j].x,pts[j].y);
+                ctx.moveTo(pts[i].x,pts[i].y);
+                ctx.lineTo(pts[j].x,pts[j].y);
                 ctx.stroke();
             }
         }
     }
-    pts.forEach(p=>{ p.tick(); ctx.beginPath(); ctx.arc(p.x,p.y,p.s,0,Math.PI*2); ctx.fillStyle=p.col; ctx.fill(); });
+    pts.forEach(p=>{
+        p.tick();
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,p.s,0,Math.PI*2);
+        ctx.fillStyle=p.col;
+        ctx.fill();
+    });
     requestAnimationFrame(draw);
 }
 draw();
@@ -636,7 +655,8 @@ document.getElementById("signupForm").addEventListener("submit", function(e) {
     spinner.classList.add("show");
     btnText.textContent = "Creating Account...";
 
-    fetch("http://localhost:8080/api/students/signup", {
+    /* ✅ UPDATED BACKEND URL */
+    fetch("https://aiinternship-backend-5.onrender.com/api/students/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ fullName, email, password })
@@ -649,7 +669,9 @@ document.getElementById("signupForm").addEventListener("submit", function(e) {
 
         if (data === "Signup successful") {
             showMessage("Account created successfully! Redirecting...", "success");
-            setTimeout(() => { window.location.href = "student-login.html"; }, 2000);
+            setTimeout(() => {
+                window.location.href = "student-login.html";
+            }, 2000);
         } else {
             showMessage(data || "Signup failed. Please try again.", "error");
         }
@@ -668,10 +690,11 @@ function showMessage(text, type) {
     message.textContent = text;
     message.className = `message ${type}`;
     message.style.display = "block";
-    if (type === "success") setTimeout(() => { message.style.display = "none"; }, 5000);
+    if (type === "success") {
+        setTimeout(() => { message.style.display = "none"; }, 5000);
+    }
 }
 
-// Add floating animation to form groups on load
 window.addEventListener('load', () => {
     const formGroups = document.querySelectorAll('.form-group');
     formGroups.forEach((group, index) => {
@@ -680,6 +703,5 @@ window.addEventListener('load', () => {
     });
 });
 </script>
-
 </body>
 </html>

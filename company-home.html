@@ -728,11 +728,30 @@ body {
 </footer>
 
 <script>
+    const BASE_URL = "https://aiinternship-backend-5.onrender.com";
+
     const email = localStorage.getItem("companyEmail");
+
+    // Redirect if not logged in
     if (!email) {
         window.location.href = "company-login.html";
+    } else {
+        document.getElementById("companyEmail").innerHTML =
+            `<i class="fas fa-circle-dot" style="color:var(--gold)"></i> ${email}`;
     }
-    document.getElementById("companyEmail").innerHTML = `<i class="fas fa-circle-dot" style="color:var(--gold)"></i> ${email || 'Company Account'}`;
+
+    // OPTIONAL: verify company exists in backend (recommended)
+    fetch(`${BASE_URL}/api/company/verify?email=${encodeURIComponent(email)}`)
+        .then(res => {
+            if (!res.ok) {
+                throw new Error("Invalid session");
+            }
+            return res.text();
+        })
+        .catch(() => {
+            localStorage.removeItem("companyEmail");
+            window.location.href = "company-login.html";
+        });
 
     function go(page) {
         window.location.href = page;
@@ -741,13 +760,19 @@ body {
     function logout() {
         if (confirm('Are you sure you want to logout?')) {
             localStorage.removeItem("companyEmail");
-            window.location.href = "company-login.html";
+
+            // Optional backend logout call
+            fetch(`${BASE_URL}/api/company/logout`, {
+                method: "POST"
+            }).finally(() => {
+                window.location.href = "company-login.html";
+            });
         }
     }
 
     // Intersection observer for card animations
     const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry, i) => {
+        entries.forEach((entry) => {
             if (entry.isIntersecting) {
                 setTimeout(() => {
                     entry.target.classList.add('visible');

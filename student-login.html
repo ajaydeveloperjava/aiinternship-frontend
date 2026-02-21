@@ -550,6 +550,9 @@
 </footer>
 
 <script>
+/* ─── BACKEND BASE URL ─── */
+const BASE_URL = "https://aiinternship-backend-5.onrender.com";
+
 /* ─── CURSOR ─── */
 const dot  = document.getElementById('cursorDot');
 const ring = document.getElementById('cursorRing');
@@ -561,14 +564,24 @@ document.addEventListener('mousemove',e=>{
 });
 
 (function loopRing(){
-    rx+=(mx-rx)*0.11; ry+=(my-ry)*0.11;
-    ring.style.left=rx+'px'; ring.style.top=ry+'px';
+    rx+=(mx-rx)*0.11; 
+    ry+=(my-ry)*0.11;
+    ring.style.left=rx+'px'; 
+    ring.style.top=ry+'px';
     requestAnimationFrame(loopRing);
 })();
 
 document.querySelectorAll('input, button, a').forEach(el=>{
-    el.addEventListener('mouseenter',()=>{ ring.style.width='48px'; ring.style.height='48px'; ring.style.borderColor='rgba(201,168,76,0.6)'; });
-    el.addEventListener('mouseleave',()=>{ ring.style.width='32px'; ring.style.height='32px'; ring.style.borderColor='rgba(245,243,239,0.35)'; });
+    el.addEventListener('mouseenter',()=>{
+        ring.style.width='48px';
+        ring.style.height='48px';
+        ring.style.borderColor='rgba(201,168,76,0.6)';
+    });
+    el.addEventListener('mouseleave',()=>{
+        ring.style.width='32px';
+        ring.style.height='32px';
+        ring.style.borderColor='rgba(245,243,239,0.35)';
+    });
 });
 
 /* ─── PARTICLES ─── */
@@ -576,17 +589,32 @@ const cvs=document.getElementById('particles');
 const ctx=cvs.getContext('2d');
 let W,H,pts=[];
 
-function resize(){ W=cvs.width=window.innerWidth; H=cvs.height=window.innerHeight; }
-resize(); window.addEventListener('resize',resize);
+function resize(){ 
+    W=cvs.width=window.innerWidth; 
+    H=cvs.height=window.innerHeight; 
+}
+resize(); 
+window.addEventListener('resize',resize);
 
 function Pt(){
-    this.x=Math.random()*W; this.y=Math.random()*H;
+    this.x=Math.random()*W; 
+    this.y=Math.random()*H;
     this.s=Math.random()*1.0+0.3;
-    this.vx=(Math.random()-.5)*0.16; this.vy=(Math.random()-.5)*0.16;
+    this.vx=(Math.random()-.5)*0.16; 
+    this.vy=(Math.random()-.5)*0.16;
     this.a=Math.random()*0.35+0.07;
-    this.col=Math.random()>.55?`rgba(201,168,76,${this.a})`:`rgba(245,243,239,${this.a})`;
+    this.col=Math.random()>.55
+        ? `rgba(201,168,76,${this.a})`
+        : `rgba(245,243,239,${this.a})`;
 }
-Pt.prototype.tick=function(){ this.x+=this.vx; this.y+=this.vy; if(this.x<0)this.x=W; if(this.x>W)this.x=0; if(this.y<0)this.y=H; if(this.y>H)this.y=0; };
+Pt.prototype.tick=function(){ 
+    this.x+=this.vx; 
+    this.y+=this.vy; 
+    if(this.x<0)this.x=W; 
+    if(this.x>W)this.x=0; 
+    if(this.y<0)this.y=H; 
+    if(this.y>H)this.y=0; 
+};
 
 for(let i=0;i<80;i++) pts.push(new Pt());
 
@@ -594,24 +622,32 @@ function draw(){
     ctx.clearRect(0,0,W,H);
     for(let i=0;i<pts.length;i++){
         for(let j=i+1;j<pts.length;j++){
-            const dx=pts[i].x-pts[j].x, dy=pts[i].y-pts[j].y;
+            const dx=pts[i].x-pts[j].x, 
+                  dy=pts[i].y-pts[j].y;
             const d=Math.sqrt(dx*dx+dy*dy);
             if(d<100){
                 ctx.beginPath();
                 ctx.strokeStyle=`rgba(201,168,76,${0.05*(1-d/100)})`;
                 ctx.lineWidth=0.5;
-                ctx.moveTo(pts[i].x,pts[i].y); ctx.lineTo(pts[j].x,pts[j].y);
+                ctx.moveTo(pts[i].x,pts[i].y);
+                ctx.lineTo(pts[j].x,pts[j].y);
                 ctx.stroke();
             }
         }
     }
-    pts.forEach(p=>{ p.tick(); ctx.beginPath(); ctx.arc(p.x,p.y,p.s,0,Math.PI*2); ctx.fillStyle=p.col; ctx.fill(); });
+    pts.forEach(p=>{
+        p.tick();
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,p.s,0,Math.PI*2);
+        ctx.fillStyle=p.col;
+        ctx.fill();
+    });
     requestAnimationFrame(draw);
 }
 draw();
 
-/* ─── FORM ─── */
-document.getElementById("loginForm").addEventListener("submit", function(e) {
+/* ─── LOGIN FORM ─── */
+document.getElementById("loginForm").addEventListener("submit", async function(e) {
     e.preventDefault();
 
     const email = document.getElementById("email").value.trim();
@@ -624,20 +660,29 @@ document.getElementById("loginForm").addEventListener("submit", function(e) {
     message.style.display = "none";
     message.className = "message";
 
-    if (!email || !/\S+@\S+\.\S+/.test(email)) { showMessage("Please enter a valid email address", "error"); return; }
-    if (!password || password.length < 6) { showMessage("Password must be at least 6 characters", "error"); return; }
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+        showMessage("Please enter a valid email address", "error");
+        return;
+    }
+
+    if (!password || password.length < 6) {
+        showMessage("Password must be at least 6 characters", "error");
+        return;
+    }
 
     submitBtn.disabled = true;
     spinner.classList.add("show");
     btnText.textContent = "Signing In...";
 
-    fetch("http://localhost:8080/api/students/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password })
-    })
-    .then(res => res.text())
-    .then(data => {
+    try {
+        const response = await fetch(`${BASE_URL}/api/students/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.text();
+
         submitBtn.disabled = false;
         spinner.classList.remove("show");
         btnText.textContent = "Sign In";
@@ -646,25 +691,28 @@ document.getElementById("loginForm").addEventListener("submit", function(e) {
             localStorage.setItem("userEmail", email);
             showMessage("Redirecting to survey...", "success");
             setTimeout(() => { window.location.href = "survey1.html"; }, 1500);
+
         } else if (data === "PROFILE_REQUIRED") {
             localStorage.setItem("userEmail", email);
             showMessage("Please complete your profile...", "success");
             setTimeout(() => { window.location.href = "create-profile.html"; }, 1500);
+
         } else if (data === "Login Successful") {
             localStorage.setItem("userEmail", email);
             showMessage("Login successful! Redirecting...", "success");
             setTimeout(() => { window.location.href = "student-home.html"; }, 1500);
+
         } else {
             showMessage(data || "Login failed. Please check your credentials.", "error");
         }
-    })
-    .catch(error => {
+
+    } catch (error) {
         submitBtn.disabled = false;
         spinner.classList.remove("show");
         btnText.textContent = "Sign In";
-        showMessage("Network error. Please check your connection.", "error");
+        showMessage("Server error. Please try again later.", "error");
         console.error("Login error:", error);
-    });
+    }
 });
 
 function showMessage(text, type) {
@@ -672,24 +720,10 @@ function showMessage(text, type) {
     message.textContent = text;
     message.className = `message ${type}`;
     message.style.display = "block";
-    if (type === "success") setTimeout(() => { message.style.display = "none"; }, 5000);
-}
-
-// Add floating animation to form groups on load
-window.addEventListener('load', () => {
-    const formGroups = document.querySelectorAll('.form-group');
-    formGroups.forEach((group, index) => {
-        group.style.animationDelay = `${index * 0.1}s`;
-        group.style.animation = 'slideRight 0.6s cubic-bezier(0.16,1,0.3,1) forwards';
-    });
-});
-
-// Enter key support
-document.addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-        document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+    if (type === "success") {
+        setTimeout(() => { message.style.display = "none"; }, 5000);
     }
-});
+}
 </script>
 
 </body>

@@ -613,48 +613,87 @@ body {
 </div>
 
 <script>
-    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-    const nextBtn    = document.getElementById('nextBtn');
-    const pills      = document.getElementById('pills');
-    const selCount   = document.getElementById('selCount');
 
-    checkboxes.forEach(cb => {
-        cb.addEventListener('change', updateUI);
+/* ───────── CONFIG ───────── */
+const FRONTEND_BASE = "https://ajaydeveloperjava.github.io/aiinternship-frontend";
+
+/* ───────── ELEMENTS ───────── */
+const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+const nextBtn    = document.getElementById('nextBtn');
+const pills      = document.getElementById('pills');
+const selCount   = document.getElementById('selCount');
+const progressFill = document.getElementById('progressFill');
+
+/* ───────── RESTORE SAVED DOMAINS (if user goes back) ───────── */
+window.addEventListener("DOMContentLoaded", () => {
+    const saved = localStorage.getItem("domains");
+    if (saved) {
+        const savedArray = saved.split(",");
+        checkboxes.forEach(cb => {
+            if (savedArray.includes(cb.value)) {
+                cb.checked = true;
+            }
+        });
+    }
+    updateUI();
+});
+
+/* ───────── CHECKBOX LISTENER ───────── */
+checkboxes.forEach(cb => {
+    cb.addEventListener('change', updateUI);
+});
+
+/* ───────── UPDATE UI ───────── */
+function updateUI() {
+
+    const checked = [...checkboxes].filter(cb => cb.checked);
+    const count   = checked.length;
+
+    // Update counter
+    selCount.textContent = count;
+    selCount.classList.toggle('has-selection', count > 0);
+
+    // Enable / Disable button
+    nextBtn.disabled = count === 0;
+
+    // Update pills
+    pills.innerHTML = '';
+    checked.forEach(cb => {
+        const pill = document.createElement('span');
+        pill.className = 'pill';
+        pill.textContent = cb.value;
+        pills.appendChild(pill);
     });
 
-    function updateUI() {
-        const checked = [...checkboxes].filter(cb => cb.checked);
-        const count   = checked.length;
+    // Update progress bar
+    const pct = Math.min(33 + (count / checkboxes.length) * 20, 50);
+    progressFill.style.width = pct + '%';
+}
 
-        // update counter
-        selCount.textContent = count;
-        selCount.classList.toggle('has-selection', count > 0);
+/* ───────── NEXT PAGE ───────── */
+function nextPage() {
 
-        // update button
-        nextBtn.disabled = count === 0;
+    const selected = [...checkboxes]
+        .filter(cb => cb.checked)
+        .map(cb => cb.value);
 
-        // update pills
-        pills.innerHTML = '';
-        checked.forEach(cb => {
-            const pill = document.createElement('span');
-            pill.className = 'pill';
-            pill.textContent = cb.value;
-            pills.appendChild(pill);
-        });
-
-        // update progress width
-        const pct = Math.min(33 + (count / checkboxes.length) * 20, 50);
-        document.getElementById('progressFill').style.width = pct + '%';
+    if (selected.length === 0) {
+        alert("Please select at least one domain.");
+        return;
     }
 
-    function nextPage() {
-        const selected = [...checkboxes].filter(cb => cb.checked).map(cb => cb.value);
-        if (selected.length === 0) { alert("Select at least one domain"); return; }
-        localStorage.setItem("domains", selected.join(","));
-        document.body.style.opacity = '0';
-        document.body.style.transform = 'scale(0.97)';
-        setTimeout(() => window.location.href = "survey2.html", 300);
-    }
+    // Save properly as JSON
+    localStorage.setItem("domains", JSON.stringify(selected));
+
+    // Smooth transition
+    document.body.style.opacity = '0';
+    document.body.style.transform = 'scale(0.97)';
+
+    setTimeout(() => {
+        window.location.href = `${FRONTEND_BASE}/survey2.html`;
+    }, 300);
+}
+
 </script>
 
 </body>

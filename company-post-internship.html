@@ -523,6 +523,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 </div>
 
 <script>
+const BASE_URL = "https://aiinternship-backend-5.onrender.com";
+
 const email = localStorage.getItem("companyEmail");
 if (!email) {
     window.location.href = "company-login.html";
@@ -531,9 +533,11 @@ if (!email) {
 const params = new URLSearchParams(window.location.search);
 const editId = params.get("id");
 
+// Toggle stipend field
 function toggleStipend() {
     const stipendField = document.getElementById('stipendField');
     const stipendInput = document.getElementById('stipend');
+    const stipendProvided = document.getElementById('stipendProvided');
 
     if (stipendProvided.value === "true") {
         stipendField.classList.add('show');
@@ -541,6 +545,7 @@ function toggleStipend() {
     } else {
         stipendField.classList.remove('show');
         stipendInput.required = false;
+        stipendInput.value = "";
     }
 }
 
@@ -550,8 +555,11 @@ if (editId) {
     document.querySelector('.subtitle').innerText = "Update the internship details below";
     document.querySelector('.header-eyebrow').innerText = "Edit Listing";
 
-    fetch(`http://localhost:8080/api/internships/${editId}`)
-    .then(res => res.json())
+    fetch(`${BASE_URL}/api/internships/${editId}`)
+    .then(res => {
+        if (!res.ok) throw new Error("Failed to fetch internship");
+        return res.json();
+    })
     .then(i => {
         companyName.value = i.companyName;
         role.value = i.role;
@@ -562,7 +570,7 @@ if (editId) {
         location.value = i.location;
         roleType.value = i.roleType;
         mode.value = i.internshipMode;
-        stipendProvided.value = i.stipendProvided;
+        stipendProvided.value = String(i.stipendProvided);
         stipend.value = i.stipend;
         rounds.value = i.totalRounds;
         process.value = i.selectionProcess;
@@ -570,7 +578,10 @@ if (editId) {
         applicationDeadline.value = i.applicationDeadline ?? '';
         toggleStipend();
     })
-    .catch(err => console.error('Error loading data:', err));
+    .catch(err => {
+        console.error("Error loading internship:", err);
+        alert("Failed to load internship data.");
+    });
 }
 
 function submitForm() {
@@ -578,16 +589,16 @@ function submitForm() {
     const btnText = document.getElementById('btnText');
 
     btn.classList.add('loading');
-    btnText.textContent = 'Saving...';
+    btnText.textContent = editId ? 'Updating...' : 'Saving...';
 
     const url = editId
-        ? `http://localhost:8080/api/internships/update/${editId}`
-        : `http://localhost:8080/api/internships/post`;
+        ? `${BASE_URL}/api/internships/update/${editId}`
+        : `${BASE_URL}/api/internships/post`;
 
     const method = editId ? "PUT" : "POST";
 
     fetch(url, {
-        method,
+        method: method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             companyEmail: email,
@@ -595,28 +606,31 @@ function submitForm() {
             role: role.value,
             internshipDescription: description.value,
             requiredSkills: skills.value,
-            cgpa: cgpa.value,
+            cgpa: parseFloat(cgpa.value),
             duration: duration.value,
             location: location.value,
             roleType: roleType.value,
             internshipMode: mode.value,
             stipendProvided: stipendProvided.value === "true",
             stipend: stipendProvided.value === "true" ? stipend.value : "No stipend",
-            totalRounds: rounds.value,
+            totalRounds: parseInt(rounds.value),
             selectionProcess: process.value,
             applyLink: applyLink.value,
             applicationDeadline: applicationDeadline.value || null
         })
     })
-    .then(res => res.text())
+    .then(res => {
+        if (!res.ok) throw new Error("Failed to save internship");
+        return res.text();
+    })
     .then(() => {
         window.location.href = "edit-internship.html";
     })
     .catch(err => {
-        console.error('Error:', err);
+        console.error("Error:", err);
         btn.classList.remove('loading');
         btnText.textContent = 'Save Internship';
-        alert('Error saving internship. Please try again.');
+        alert("Error saving internship. Please try again.");
     });
 }
 </script>

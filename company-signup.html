@@ -586,108 +586,107 @@
     </div>
 
     <script>
-        const nameInput = document.getElementById('name');
-        const email = document.getElementById('email');
-        const password = document.getElementById('password');
-        const signupBtn = document.getElementById('signupBtn');
-        const msg = document.getElementById('msg');
-        const passwordStrength = document.getElementById('passwordStrength');
-        const strengthBar = document.getElementById('strengthBar');
+    const nameInput = document.getElementById('name');
+    const email = document.getElementById('email');
+    const password = document.getElementById('password');
+    const signupBtn = document.getElementById('signupBtn');
+    const msg = document.getElementById('msg');
+    const passwordStrength = document.getElementById('passwordStrength');
+    const strengthBar = document.getElementById('strengthBar');
 
-        // Password strength checker
-        password.addEventListener('input', function() {
-            const val = this.value;
-            let strength = 0;
-            
-            if (val.length >= 8) strength++;
-            if (/[A-Z]/.test(val)) strength++;
-            if (/[0-9]/.test(val)) strength++;
-            if (/[^A-Za-z0-9]/.test(val)) strength++;
-            
-            passwordStrength.className = 'password-strength';
-            
-            if (val.length === 0) {
-                strengthBar.style.width = '0';
-            } else if (strength <= 1) {
-                passwordStrength.classList.add('strength-weak');
-            } else if (strength <= 3) {
-                passwordStrength.classList.add('strength-medium');
-            } else {
-                passwordStrength.classList.add('strength-strong');
-            }
-        });
+    const BASE_URL = "https://aiinternship-backend-5.onrender.com";
 
-        function signup() {
-            // Enhanced validation
-            if (!nameInput.value.trim()) {
-                showMessage('Please enter your company name', 'error');
-                nameInput.focus();
-                return;
-            }
+    // Password strength checker
+    password.addEventListener('input', function() {
+        const val = this.value;
+        let strength = 0;
 
-            if (!email.value || !email.value.includes('@')) {
-                showMessage('Please enter a valid email address', 'error');
-                email.focus();
-                return;
-            }
+        if (val.length >= 8) strength++;
+        if (/[A-Z]/.test(val)) strength++;
+        if (/[0-9]/.test(val)) strength++;
+        if (/[^A-Za-z0-9]/.test(val)) strength++;
 
-            if (!password.value || password.value.length < 6) {
-                showMessage('Password must be at least 6 characters', 'error');
-                password.focus();
-                return;
-            }
+        passwordStrength.className = 'password-strength';
 
-            // Show loading state
-            signupBtn.classList.add('loading');
-            signupBtn.querySelector('span').textContent = 'Creating Account...';
-            msg.textContent = '';
-            msg.className = '';
+        if (val.length === 0) {
+            strengthBar.style.width = '0';
+        } else if (strength <= 1) {
+            passwordStrength.classList.add('strength-weak');
+        } else if (strength <= 3) {
+            passwordStrength.classList.add('strength-medium');
+        } else {
+            passwordStrength.classList.add('strength-strong');
+        }
+    });
 
-            fetch("http://localhost:8080/api/company/signup", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    companyName: nameInput.value.trim(),
-                    email: email.value.trim(),
-                    password: password.value
-                })
-            })
-            .then(res => res.text())
-            .then(data => {
-                signupBtn.classList.remove('loading');
-                signupBtn.querySelector('span').textContent = 'Create Account';
-                
-                const isSuccess = data.includes("successful") || data.includes("success");
-                showMessage(data, isSuccess ? 'success' : 'error');
-                
-                if (isSuccess) {
-                    setTimeout(() => {
-                        window.location.href = "company-login.html";
-                    }, 1500);
-                }
-            })
-            .catch(error => {
-                signupBtn.classList.remove('loading');
-                signupBtn.querySelector('span').textContent = 'Create Account';
-                showMessage('Network error. Please try again.', 'error');
-                console.error('Signup error:', error);
-            });
+    function signup() {
+
+        if (!nameInput.value.trim()) {
+            showMessage('Please enter your company name', 'error');
+            nameInput.focus();
+            return;
         }
 
-        function showMessage(text, type) {
-            msg.textContent = text;
-            msg.className = type;
+        if (!email.value || !email.value.includes('@')) {
+            showMessage('Please enter a valid email address', 'error');
+            email.focus();
+            return;
         }
 
-        // Allow Enter key to signup
-        document.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && document.activeElement !== password) {
-                signup();
-            }
-        });
+        if (!password.value || password.value.length < 6) {
+            showMessage('Password must be at least 6 characters', 'error');
+            password.focus();
+            return;
+        }
 
-        // Auto-focus first input
-        nameInput.focus();
-    </script>
+        signupBtn.classList.add('loading');
+        signupBtn.querySelector('span').textContent = 'Creating Account...';
+        msg.textContent = '';
+        msg.className = '';
+
+        fetch(`${BASE_URL}/api/company/signup`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                companyName: nameInput.value.trim(),
+                email: email.value.trim(),
+                password: password.value
+            })
+        })
+        .then(res => res.text())
+        .then(data => {
+            signupBtn.classList.remove('loading');
+            signupBtn.querySelector('span').textContent = 'Create Account';
+
+            const isSuccess = data.toLowerCase().includes("success");
+            showMessage(data, isSuccess ? 'success' : 'error');
+
+            if (isSuccess) {
+                setTimeout(() => {
+                    window.location.href = "company-login.html";
+                }, 1500);
+            }
+        })
+        .catch(error => {
+            signupBtn.classList.remove('loading');
+            signupBtn.querySelector('span').textContent = 'Create Account';
+            showMessage('Network error. Please try again.', 'error');
+            console.error('Signup error:', error);
+        });
+    }
+
+    function showMessage(text, type) {
+        msg.textContent = text;
+        msg.className = type;
+    }
+
+    document.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            signup();
+        }
+    });
+
+    nameInput.focus();
+</script>
 </body>
 </html>

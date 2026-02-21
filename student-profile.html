@@ -535,6 +535,11 @@
 </footer>
 
 <script>
+/* ───────────────────────────────────────── */
+/* BACKEND BASE URL (PRODUCTION)            */
+/* ───────────────────────────────────────── */
+const BASE_URL = "https://aiinternship-backend-5.onrender.com";
+
 /* ─── CURSOR ─── */
 const dot  = document.getElementById('cursorDot');
 const ring = document.getElementById('cursorRing');
@@ -552,8 +557,16 @@ document.addEventListener('mousemove',e=>{
 })();
 
 document.querySelectorAll('button, a, .pcard').forEach(el=>{
-    el.addEventListener('mouseenter',()=>{ ring.style.width='50px'; ring.style.height='50px'; ring.style.borderColor='rgba(201,168,76,0.55)'; });
-    el.addEventListener('mouseleave',()=>{ ring.style.width='32px'; ring.style.height='32px'; ring.style.borderColor='rgba(245,243,239,0.35)'; });
+    el.addEventListener('mouseenter',()=>{
+        ring.style.width='50px';
+        ring.style.height='50px';
+        ring.style.borderColor='rgba(201,168,76,0.55)';
+    });
+    el.addEventListener('mouseleave',()=>{
+        ring.style.width='32px';
+        ring.style.height='32px';
+        ring.style.borderColor='rgba(245,243,239,0.35)';
+    });
 });
 
 /* ─── PARTICLES ─── */
@@ -561,90 +574,149 @@ const cvs=document.getElementById('particles');
 const ctx=cvs.getContext('2d');
 let W,H,pts=[];
 
-function resize(){ W=cvs.width=window.innerWidth; H=cvs.height=window.innerHeight; }
-resize(); window.addEventListener('resize',resize);
+function resize(){ 
+    W=cvs.width=window.innerWidth; 
+    H=cvs.height=window.innerHeight; 
+}
+resize(); 
+window.addEventListener('resize',resize);
 
 function Pt(){
-    this.x=Math.random()*W; this.y=Math.random()*H;
+    this.x=Math.random()*W; 
+    this.y=Math.random()*H;
     this.s=Math.random()*1.0+0.3;
-    this.vx=(Math.random()-.5)*0.14; this.vy=(Math.random()-.5)*0.14;
+    this.vx=(Math.random()-.5)*0.14; 
+    this.vy=(Math.random()-.5)*0.14;
     this.a=Math.random()*0.32+0.06;
-    this.col=Math.random()>.55?`rgba(201,168,76,${this.a})`:`rgba(245,243,239,${this.a})`;
+    this.col=Math.random()>.55
+        ? `rgba(201,168,76,${this.a})`
+        : `rgba(245,243,239,${this.a})`;
 }
-Pt.prototype.tick=function(){ this.x+=this.vx; this.y+=this.vy; if(this.x<0)this.x=W; if(this.x>W)this.x=0; if(this.y<0)this.y=H; if(this.y>H)this.y=0; };
+
+Pt.prototype.tick=function(){
+    this.x+=this.vx; 
+    this.y+=this.vy;
+    if(this.x<0)this.x=W; 
+    if(this.x>W)this.x=0; 
+    if(this.y<0)this.y=H; 
+    if(this.y>H)this.y=0;
+};
+
 for(let i=0;i<80;i++) pts.push(new Pt());
 
 function draw(){
     ctx.clearRect(0,0,W,H);
     for(let i=0;i<pts.length;i++){
         for(let j=i+1;j<pts.length;j++){
-            const dx=pts[i].x-pts[j].x, dy=pts[i].y-pts[j].y;
+            const dx=pts[i].x-pts[j].x;
+            const dy=pts[i].y-pts[j].y;
             const d=Math.sqrt(dx*dx+dy*dy);
             if(d<100){
                 ctx.beginPath();
                 ctx.strokeStyle=`rgba(201,168,76,${0.045*(1-d/100)})`;
                 ctx.lineWidth=0.5;
-                ctx.moveTo(pts[i].x,pts[i].y); ctx.lineTo(pts[j].x,pts[j].y);
+                ctx.moveTo(pts[i].x,pts[i].y);
+                ctx.lineTo(pts[j].x,pts[j].y);
                 ctx.stroke();
             }
         }
     }
-    pts.forEach(p=>{ p.tick(); ctx.beginPath(); ctx.arc(p.x,p.y,p.s,0,Math.PI*2); ctx.fillStyle=p.col; ctx.fill(); });
+    pts.forEach(p=>{
+        p.tick();
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,p.s,0,Math.PI*2);
+        ctx.fillStyle=p.col;
+        ctx.fill();
+    });
     requestAnimationFrame(draw);
 }
 draw();
 
-/* ─── PROFILE LOAD ─── */
+/* ───────────────────────────────────────── */
+/* PROFILE LOAD (PRODUCTION READY)          */
+/* ───────────────────────────────────────── */
+
 const email = localStorage.getItem("userEmail");
 
+// If not logged in → redirect
 if(!email){
     window.location.href="student-login.html";
 }
 
-fetch(`http://localhost:8080/api/students/profile?email=${email}`)
-.then(res => res.json())
-.then(data => {
-    // Avatar name
-    document.getElementById("avatarName").innerText = data.fullName || email || 'Student';
+// Fetch from LIVE backend
+fetch(`${BASE_URL}/api/students/profile?email=${encodeURIComponent(email)}`)
+.then(res=>{
+    if(!res.ok){
+        throw new Error("Invalid session");
+    }
+    return res.json();
+})
+.then(data=>{
 
-    document.getElementById("college").innerText = data.collegeName || 'Not specified';
-    document.getElementById("degree").innerText = data.degree || 'Not specified';
-    document.getElementById("department").innerText = data.department || 'Not specified';
-    document.getElementById("year").innerText = data.yearOfStudy || 'Not specified';
-    document.getElementById("cgpa").innerText = data.cgpa || '–';
-    document.getElementById("location").innerText = data.preferredLocation || 'Not specified';
+    document.getElementById("avatarName").innerText =
+        data.fullName || email || "Student";
 
-    // Skills — render chips
+    document.getElementById("college").innerText =
+        data.collegeName || "Not specified";
+
+    document.getElementById("degree").innerText =
+        data.degree || "Not specified";
+
+    document.getElementById("department").innerText =
+        data.department || "Not specified";
+
+    document.getElementById("year").innerText =
+        data.yearOfStudy || "Not specified";
+
+    document.getElementById("cgpa").innerText =
+        data.cgpa || "–";
+
+    document.getElementById("location").innerText =
+        data.preferredLocation || "Not specified";
+
+    /* Skills */
     const skillsEl = document.getElementById("skills");
     if(data.skills){
-        const skillArr = data.skills.split(',').map(s=>s.trim()).filter(Boolean);
-        skillsEl.innerHTML = skillArr.map(s=>`<span class="skill-chip">${s}</span>`).join('');
+        const skillArr = data.skills
+            .split(',')
+            .map(s=>s.trim())
+            .filter(Boolean);
+
+        skillsEl.innerHTML = skillArr
+            .map(s=>`<span class="skill-chip">${s}</span>`)
+            .join('');
     } else {
-        skillsEl.innerHTML = `<span style="font-size:13px;color:var(--muted);font-style:italic;">No skills specified</span>`;
+        skillsEl.innerHTML =
+            `<span style="font-size:13px;color:var(--muted);font-style:italic;">
+                No skills specified
+             </span>`;
     }
 
-    // Resume
-    const resumeFile = data.resumeFileName;
+    /* Resume */
     const resumeWrap = document.getElementById("resumeWrap");
-    if(resumeFile){
+    if(data.resumeFileName){
         resumeWrap.innerHTML = `
-            <a href="/uploads/resumes/${resumeFile}" class="resume-link" id="resumeLink" target="_blank">
-                <i class="fas fa-file-pdf"></i> ${resumeFile}
+            <a href="${BASE_URL}/uploads/resumes/${data.resumeFileName}"
+               class="resume-link"
+               target="_blank">
+                <i class="fas fa-file-pdf"></i> ${data.resumeFileName}
             </a>`;
     } else {
-        resumeWrap.innerHTML = `<span style="font-size:13px;color:var(--muted);font-style:italic;display:block;margin-top:10px;">No resume uploaded</span>`;
+        resumeWrap.innerHTML =
+            `<span style="font-size:13px;color:var(--muted);font-style:italic;display:block;margin-top:10px;">
+                No resume uploaded
+             </span>`;
     }
+
 })
-.catch(err => {
-    console.error('Profile load error:', err);
-    ['college','degree','department','year','cgpa','location'].forEach(id=>{
-        const el = document.getElementById(id);
-        if(el) el.innerHTML = `<span style="font-size:13px;color:#f87171;">Error loading</span>`;
-    });
-    document.getElementById("avatarName").innerText = 'Student';
-    document.getElementById("skills").innerHTML = `<span style="font-size:13px;color:#f87171;">Error loading</span>`;
-    document.getElementById("resumeWrap").innerHTML = `<span style="font-size:13px;color:#f87171;">Error loading</span>`;
+.catch(err=>{
+    console.error("Profile load error:", err);
+
+    localStorage.removeItem("userEmail");
+    window.location.href="student-login.html";
 });
+
+/* ─── NAVIGATION ─── */
 
 function editProfile(){
     window.location.href="create-profile.html";
@@ -653,13 +725,6 @@ function editProfile(){
 function goHome(){
     window.location.href="student-home.html";
 }
-
-// Enter key support
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
-        if (document.activeElement.closest('.header-actions')) return;
-    }
-});
 </script>
 
 </body>
