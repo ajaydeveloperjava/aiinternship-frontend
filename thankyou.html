@@ -35,7 +35,7 @@ body {
     align-items: center;
     justify-content: center;
     padding: 20px;
-    overflow: hidden;
+    overflow: auto; /* fixed scrolling issue */
 }
 
 /* ── AMBIENT ── */
@@ -227,7 +227,7 @@ body {
 
     <!-- CTA -->
     <div class="cta-wrap">
-        <a href="#" class="cta-btn">
+        <a href="https://ajaydeveloperjava.github.io/aiinternship-frontend/create-profile.html" class="cta-btn">
             <i class="fas fa-arrow-right"></i>
             <span>Continue to Profile</span>
         </a>
@@ -237,8 +237,6 @@ body {
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    const FRONTEND_BASE = "https://ajaydeveloperjava.github.io/aiinternship-frontend";
-
     // Show Summary from localStorage
     const domainsRaw = localStorage.getItem("domains");
     const type       = localStorage.getItem("internshipType");
@@ -257,13 +255,6 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("domainsSummary").textContent  = formattedDomains;
     document.getElementById("typeSummary").textContent     = type    || "Not set";
     document.getElementById("stipendSummary").textContent  = stipend || "Not set";
-
-    // Fix CTA navigation
-    const profileBtn = document.querySelector(".cta-btn");
-    profileBtn.addEventListener("click", function(e) {
-        e.preventDefault();
-        window.location.href = `${FRONTEND_BASE}/create-profile.html`;
-    });
 });
 </script>
 
