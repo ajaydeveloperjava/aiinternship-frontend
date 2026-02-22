@@ -499,6 +499,7 @@ body {
     background: transparent;
     color: var(--gold);
     border: 1px solid var(--gold);
+    text-decoration: none;
     border-radius: 2px;
     font-size: 10px;
     font-family: 'Montserrat', sans-serif;
@@ -693,10 +694,10 @@ body {
                 <span class="tag">Instant Publish</span>
                 <span class="tag">Custom Rounds</span>
             </div>
-            <button class="action-btn" onclick="go('company-post-internship.html')">
+            <a class="action-btn" href="company-post-internship.html">
                 <i class="fas fa-plus"></i>
                 <span>Post Internship</span>
-            </button>
+            </a>
         </div>
 
         <div class="action-card" id="card2">
@@ -769,7 +770,7 @@ body {
                 observer.unobserve(entry.target);
             }
         });
-    }, { threshold: 0.15 });
+    }, { threshold: 0.15 });git add .
 
     document.querySelectorAll('.action-card').forEach(card => observer.observe(card));
 </script>
