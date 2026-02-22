@@ -230,6 +230,11 @@
 
   const BASE_URL = "https://aiinternship-backend-5.onrender.com";
 
+  // ✅ FIX: If already logged in, go straight to home and stop — don't show login again
+  if (localStorage.getItem("companyEmail") && localStorage.getItem("companyLoggedIn") === "true") {
+    window.location.replace("company-home.html");
+  }
+
   function login() {
     const emailVal = emailEl.value.trim();
     const passVal = passwordEl.value;
@@ -260,9 +265,11 @@
       showMessage(data, isSuccess ? 'success' : 'error');
 
       if (isSuccess) {
+        // ✅ FIX: Store both email AND a logged-in flag so home page can verify session
         localStorage.setItem("companyEmail", emailVal);
+        localStorage.setItem("companyLoggedIn", "true");
         setTimeout(() => {
-          window.location.href = "company-home.html";
+          window.location.replace("company-home.html");
         }, 1200);
       }
     })

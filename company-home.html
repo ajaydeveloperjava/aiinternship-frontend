@@ -731,27 +731,15 @@ body {
     const BASE_URL = "https://aiinternship-backend-5.onrender.com";
 
     const email = localStorage.getItem("companyEmail");
+    const loggedIn = localStorage.getItem("companyLoggedIn");
 
-    // Redirect if not logged in
-    if (!email) {
-        window.location.href = "company-login.html";
+    // ✅ FIX: Check BOTH email and the loggedIn flag — if missing, go to login
+    if (!email || loggedIn !== "true") {
+        window.location.replace("company-login.html");
     } else {
         document.getElementById("companyEmail").innerHTML =
             `<i class="fas fa-circle-dot" style="color:var(--gold)"></i> ${email}`;
     }
-
-    // OPTIONAL: verify company exists in backend (recommended)
-    fetch(`${BASE_URL}/api/company/verify?email=${encodeURIComponent(email)}`)
-        .then(res => {
-            if (!res.ok) {
-                throw new Error("Invalid session");
-            }
-            return res.text();
-        })
-        .catch(() => {
-            localStorage.removeItem("companyEmail");
-            window.location.href = "company-login.html";
-        });
 
     function go(page) {
         window.location.href = page;
@@ -759,13 +747,14 @@ body {
 
     function logout() {
         if (confirm('Are you sure you want to logout?')) {
+            // ✅ FIX: Clear BOTH keys on logout
             localStorage.removeItem("companyEmail");
+            localStorage.removeItem("companyLoggedIn");
 
-            // Optional backend logout call
             fetch(`${BASE_URL}/api/company/logout`, {
                 method: "POST"
             }).finally(() => {
-                window.location.href = "company-login.html";
+                window.location.replace("company-login.html");
             });
         }
     }
