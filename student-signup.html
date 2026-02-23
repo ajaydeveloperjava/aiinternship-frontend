@@ -656,7 +656,7 @@ document.getElementById("signupForm").addEventListener("submit", function(e) {
     btnText.textContent = "Creating Account...";
 
     /* ✅ UPDATED BACKEND URL */
-    fetch("https://aiinternship-backend-5.onrender.com/api/students/signup", {
+    fetch("https://aiinternship-backend-7.onrender.com/api/students/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ fullName, email, password })
